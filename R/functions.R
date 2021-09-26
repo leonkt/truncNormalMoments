@@ -1,5 +1,7 @@
-library(testthat)
 
+
+library(testthat)
+library(rstan)
 ################################ INTERMEDIATE TERMS ################################
 
 #' Returns the standardized lower truncation limit for a normal distribution.
@@ -393,3 +395,330 @@ cordeiro_bias = function(.m, .s, .ul, .uh, .n) {
   return( list(bias = bias, K = K, A = A) )
 }
 
+#' Auxillary function to calculate the negative log posterior with Jeffrey's prior.
+#' 
+#' @param .pars Vector of parameters specifying mu and sigma.
+#' @param par2is "sd" if the second entry in .pars is the standard deviation, and "var" otherwise.
+#' @param .x Data to use log likelihood calculation.
+#' @param .a Left truncation limit.
+#' @param .b Right truncation limit.
+nlpost_Jeffreys = function(.pars, par2is = "sd", .x, .a, .b) {
+  
+  # variance parameterization
+  if (par2is == "var") {
+    
+    .mu = .pars[1]
+    .var = .pars[2]
+    
+    if ( .var < 0 ) return(.Machine$integer.max)
+    
+    # as in nll()
+    term1 = dmvnorm(x = as.matrix(.x, nrow = 1),
+                    mean = as.matrix(.mu, nrow = 1),
+                    # sigma here is covariance matrix
+                    sigma = as.matrix(.var, nrow=1),
+                    log = TRUE)
+    
+    
+    term2 = length(.x) * log( pmvnorm(lower = .a,
+                                      upper = .b,
+                                      mean = .mu,
+                                      # remember sigma here is covariance matrix, not the SD
+                                      sigma = .var ) ) 
+    
+    term3 = log( sqrt( det( E_fisher(.mu = .mu, .sigma = sqrt(.var), .n = length(.x), .a = .a, .b = .b) ) ) )
+    
+    nlp.value = -( sum(term1) - term2 + term3 )
+    
+    if ( is.infinite(nlp.value) | is.na(nlp.value) ) return(.Machine$integer.max)
+  }
+  
+  # SD parameterization
+  if (par2is == "sd") {
+    
+    .mu = .pars[1]
+    .sigma = .pars[2]
+    
+    if ( .sigma < 0 ) return(.Machine$integer.max)
+    
+    # as in nll()
+    term1 = dmvnorm(x = as.matrix(.x, nrow = 1),
+                    mean = as.matrix(.mu, nrow = 1),
+                    # sigma here is covariance matrix,
+                    sigma = as.matrix(.sigma^2, nrow=1),
+                    log = TRUE)
+    
+    
+    term2 = length(.x) * log( pmvnorm(lower = .a,
+                                      upper = .b,
+                                      mean = .mu,
+                                      # remember sigma here is covariance matrix, not the SD
+                                      sigma = .sigma^2 ) ) 
+    
+    term3 = log( sqrt( det( E_fisher(.mu = .mu, .sigma = .sigma, .n = length(.x), .a = .a, .b = .b) ) ) )
+    
+    nlp.value = -( sum(term1) - term2 + term3 )
+    
+    if ( is.infinite(nlp.value) | is.na(nlp.value) ) return(.Machine$integer.max)
+  }
+  
+  nlp.value
+  
+}
+
+#' Finds the MAP estimates for mu and sigma of the full normal distribution, given data from a truncated normal.
+#'
+#' @param x Data from truncated normal
+#' @param p Vector of parameters containing truncation points and number of observations.
+#' @param mu.start Initial value for mu.
+#' @param sigma.start Initial value for sigma.
+#' @param ci.left String formatted as "X%". Left end of a confidence interval for each parameter estimate. 
+#' @param ci.right String formatted as "X%". Right end of a confidence interval for each parameter estimate. 
+#'
+
+estimate_jeffreys_mcmc = function(x,
+                                  p,
+                                  mu.start,
+                                  sigma.start,
+                                  ci.left,
+                                  ci.right,
+                                  ...) {
+  # LL and UU: cutpoints on RAW scale, not Z-scores
+  # sigma: SD, not variance
+  model.text <- "
+functions{
+	real jeffreys_prior(real mu, real sigma, real LL, real UU, int n){
+		real mustarL;
+		real mustarU;
+		real alphaL;
+		real alphaU;
+		real kmm;
+		real kms;
+		real kss;
+		matrix[2,2] fishinfo;
+		
+		mustarL = (LL - mu) / sigma;
+		mustarU = (UU - mu) / sigma;
+		// note that normal_lpdf, etc., parameterize in terms of SD, not var
+		//  the (0,1) below are *not* start values for MCMC
+		alphaL = exp( normal_lpdf(mustarL | 0, 1) - 
+	                log_diff_exp( normal_lcdf(mustarU | 0, 1),
+	                normal_lcdf(mustarL | 0, 1) ) ); 
+	                
+		alphaU = exp( normal_lpdf(mustarU | 0, 1) - 
+ 	                log_diff_exp( normal_lcdf(mustarU | 0, 1),
+ 	                normal_lcdf(mustarL | 0, 1) ) );
+		
+		// second derivatives for Fisher info			
+		kmm = -n/sigma^2 + n/sigma^2 * ((alphaU-alphaL)^2 + alphaU*mustarU- alphaL*mustarL);
+		kms = -2*n/sigma^2 * (alphaL - alphaU) + 
+	   		  n/sigma^2 * (alphaL - alphaU + (alphaU*mustarU^2 - alphaL*mustarL^2) +
+			  				(alphaL-alphaU) * (alphaL*mustarL - alphaU*mustarU));
+		kss = n/sigma^2 - 3*n/sigma^2 * (1 + mustarL*alphaL - mustarU*alphaU) +
+	   			n/sigma^2 * (mustarU*alphaU*(mustarU^2 - 2) - mustarL*alphaL*(mustarL^2 - 2) +
+								(alphaU*mustarU - alphaL*mustarL)^2);
+		
+		fishinfo[1,1] = -kmm;
+		fishinfo[1,2] = -kms;
+		fishinfo[2,1] = -kms;
+		fishinfo[2,2] = -kss;
+		
+		return sqrt(determinant(fishinfo));
+	}
+}
+data{
+	int<lower=0> n;
+    real LL;
+	real UU;
+	real<lower=LL,upper=UU> y[n];
+}
+parameters{
+    real mu;
+	real<lower=0> sigma;
+}
+model{
+	target += log( jeffreys_prior(mu, sigma, LL, UU, n) );
+	for(i in 1:n)
+        y[i] ~ normal(mu, sigma)T[LL,UU];
+}
+generated quantities{
+  real log_lik;
+  real log_prior = log(jeffreys_prior(mu, sigma, LL, UU, n));
+  real log_post;
+  log_lik = normal_lpdf(y | mu, sigma);
+  log_lik += -n * log_diff_exp( normal_lcdf(UU | mu, sigma), normal_lcdf(LL | mu, sigma) );  							 
+  log_post = log_lik + log_prior;
+}
+"
+
+# prepare to capture warnings from Stan
+stan.warned = 0
+stan.warning = NA
+
+# set start values for sampler
+init.fcn <- function(o){ list(mu=mu.start, sigma=sigma.start) }
+
+# like tryCatch, but captures warnings without stopping the function from
+#  returning its results
+withCallingHandlers({
+  
+  # "isystem" arg is just a placeholder to avoid Stan's not understanding special characters
+  #  in getwd(), even though we don't actually use the dir at all
+  stan.model <- stan_model(model_code = model.text,
+                           isystem = "~/Desktop", ...)
+  
+  post = sampling(stan.model,
+                  cores = 1,
+                  refresh = 0,
+                  data = list( n = p$n, LL = p$a, UU = p$b, y = x ),
+                  
+                  iter = p$stan.iter,   
+                  control = list(max_treedepth = p$stan.maxtreedepth,
+                                 adapt_delta = p$stan.adapt_delta),
+                  
+                  init = init.fcn)
+  
+  
+}, warning = function(condition){
+  stan.warned <<- 1
+  stan.warning <<- condition$message
+} )
+
+
+postSumm = summary(post)$summary
+
+
+nlpost_simple = function(.mu, .sigma) {
+  nlpost.value = nlpost_Jeffreys(.pars = c(.mu, .sigma),
+                                 par2is = par2is,
+                                 .x = x, .a = p$a, .b = p$b)
+  return(nlpost.value)
+}
+
+#bm
+
+# as confirmed in "2021-8-19 Investigate profile penalized LRT inference",
+#  the "MLEs" from this match those from optim() above
+# https://stat.ethz.ch/R-manual/R-patched/library/stats4/html/mle.html
+res = mle( minuslogl = nlpost_simple,
+           start = list( .mu=mu.start, .sigma=sigma.start) )
+
+# not actually MLEs, of course, but rather MAPs
+maps = as.numeric(coef(res))
+
+# posterior means, then medians
+Mhat = c( postSumm["mu", "mean"], median( rstan::extract(post, "mu")[[1]] ) )
+Shat = c( postSumm["sigma", "mean"], median( rstan::extract(post, "sigma")[[1]] ) )
+Vhat = Shat^2
+# sanity check
+expect_equal( Mhat[1], mean( rstan::extract(post, "mu")[[1]] ) )
+
+
+# SEs
+MhatSE = postSumm["mu", "se_mean"]
+ShatSE = postSumm["sigma", "se_mean"]
+# because VhatSE uses delta method, VhatSE will be length 2 because Shat is length 2
+VhatSE = ShatSE * 2 * Shat  
+# how Stan estimates the SE: https://discourse.mc-stan.org/t/se-mean-in-print-stanfit/2869
+#expect_equal( postSumm["mu", "sd"], sd( rstan::extract(post, "mu")[[1]] ) )
+#expect_equal( MhatSE,postSumm["mu", "sd"] / sqrt( postSumm["mu", "n_eff"] ) )
+
+# CI limits
+S.CI = c( postSumm["sigma", ci.left], postSumm["sigma", ci.right] )
+V.CI = S.CI^2
+M.CI = c( postSumm["mu", ci.left], postSumm["mu", ci.right] )
+# sanity check:
+l.lim <- as.numeric(substr(ci.left, 1, nchar(ci.left) - 1)) / 100
+r.lim <- as.numeric(substr(ci.right, 1, ncchar(ci.right) - 1)) / 100
+myMhatCI = as.numeric( c( quantile( rstan::extract(post, "mu")[[1]], l.lim ),
+                          quantile( rstan::extract(post, "mu")[[1]], r.lim ) ) )
+expect_equal(M.CI, myMhatCI)
+
+
+# the point estimates are length 2 (post means, then medians),
+#  but the inference is the same for each type of point estimate
+return( list( post = post,
+              Mhat = Mhat,
+              Vhat = Vhat,
+              Shat = Shat,
+              
+              map = maps,
+              
+              MhatSE = rep(MhatSE, 2),
+              VhatSE = VhatSE,  # already length 2 (see above)
+              ShatSE = rep(ShatSE, 2),
+              
+              M.CI = M.CI,
+              V.CI = V.CI,
+              S.CI = S.CI,
+              
+              stan.warned = stan.warned,
+              stan.warning = stan.warning,
+              
+              MhatRhat = postSumm["mu", "Rhat"],
+              ShatRhat = postSumm["sigma", "Rhat"]
+) )
+}
+
+#' Finds the Fisher information matrix contained in n samples from a truncated normal distribution.
+#'
+#' @param .mu Mean of underlying normal distribution.
+#' @param .sigma Standard deviation of underlying normal distribution.
+#' @param .n Number of observations.
+#' @param .a Lower truncation limit.
+#' @param .b Upper truncation limit.
+
+E_fisher = function(.mu, .sigma, .n, .a, .b) {
+  
+  Za = (.a - .mu) / .sigma
+  Zb = (.b - .mu) / .sigma
+  
+  alpha.a = dnorm(Za) / ( pnorm(Zb) - pnorm(Za) )
+  alpha.b = dnorm(Zb) / ( pnorm(Zb) - pnorm(Za) )
+  
+  k11 = -(.n/.sigma^2) + (.n/.sigma^2)*( (alpha.b - alpha.a)^2 + (alpha.b*Zb - alpha.a*Za) )
+  
+  k12 = -( 2*.n*(alpha.a - alpha.b) / .sigma^2 ) +
+    (.n/.sigma^2)*( alpha.a - alpha.b + alpha.b*Zb^2 - alpha.a*Za^2 +
+                      (alpha.a - alpha.b)*(alpha.a*Za - alpha.b*Zb) )
+  
+  k22 = (.n/.sigma^2) - (3*.n*(1 + alpha.a*Za - alpha.b*Zb) / .sigma^2) +
+    (.n/.sigma^2)*( Zb*alpha.b*(Zb^2 - 2) - Za*alpha.a*(Za^2 - 2) +
+                      (alpha.b*Zb - alpha.a*Za)^2 )
+  
+  return( matrix( c(-k11, -k12, -k12, -k22),
+                  nrow = 2,
+                  byrow = TRUE ) )
+}
+
+#' Returns the value of the Jeffrey's prior.
+#'
+#' @param .pars Vector of parameters specifying mu and sigma.
+#' @param .x Data to use log likelihood calculation.
+#' @param .a Left truncation limit.
+#' @param .b Right truncation limit.
+
+prior = function(.pars, .x, .a, .b) {
+  .mu = .pars[1]
+  .sigma = .pars[2]
+  
+
+  return (log( sqrt( det( E_fisher(.mu = .mu, .sigma = .sigma, .n = length(.x), .a = .a, .b = .b) ) ) ))
+}
+
+#' Returns the value of the negative log-posterior with the Jeffrey's prior.
+#'
+#' @param .pars Vector of parameters specifying mu and sigma.
+#' @param .x Data to use log likelihood calculation.
+#' @param .a Left truncation limit.
+#' @param .b Right truncation limit.
+
+neg_log_post = function(.pars, .x, .a, .b) {
+  .mu = .pars[1]
+  .sigma = .pars[2]
+  
+  # regular LL part
+  -sum( log( dtruncnorm(x = .x, a = .a, b = .b, mean = .mu, sd = .sigma) ) ) -
+    # Jeffreys part
+    log( sqrt( det( E_fisher(.mu = .mu, .sigma = .sigma, .n = length(.x), .a = .a, .b = .b) ) ) )
+}
