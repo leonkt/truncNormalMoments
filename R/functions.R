@@ -389,6 +389,9 @@ cumulants_check <- function(m, s, ul, uh, n) {
 #' @param n Number of observations.
 #' 
 cordeiro_bias = function(.m, .s, .ul, .uh, .n) {
+  if (.s <= 0) {
+    
+  }
   K <- find_K( m=.m, s=.s, ul=.ul, uh=.uh, n=.n)
   A <- find_A( m=.m, s=.s, ul=.ul, uh=.uh, n=.n)
   bias <- inv(K) %*% A %*% c(inv(K))
@@ -403,7 +406,7 @@ cordeiro_bias = function(.m, .s, .ul, .uh, .n) {
 #' @param .a Left truncation limit.
 #' @param .b Right truncation limit.
 nlpost_Jeffreys = function(.pars, par2is = "sd", .x, .a, .b) {
-  
+  assert("Left truncation is before right truncation" , .a < b )
   # variance parameterization
   if (par2is == "var") {
     
@@ -483,6 +486,7 @@ estimate_jeffreys_mcmc = function(x,
                                   ci.left,
                                   ci.right,
                                   ...) {
+  assert("Feasible standard deviation starting point ", sigma.start > 0)
   # LL and UU: cutpoints on RAW scale, not Z-scores
   # sigma: SD, not variance
   model.text <- "
@@ -630,6 +634,9 @@ M.CI = c( postSumm["mu", ci.left], postSumm["mu", ci.right] )
 # sanity check:
 l.lim <- as.numeric(substr(ci.left, 1, nchar(ci.left) - 1)) / 100
 r.lim <- as.numeric(substr(ci.right, 1, ncchar(ci.right) - 1)) / 100
+
+assert("Left endpoint is less than right endpoint", l.lim < r.lim)
+
 myMhatCI = as.numeric( c( quantile( rstan::extract(post, "mu")[[1]], l.lim ),
                           quantile( rstan::extract(post, "mu")[[1]], r.lim ) ) )
 expect_equal(M.CI, myMhatCI)
@@ -669,6 +676,8 @@ return( list( post = post,
 #' @param .b Upper truncation limit.
 
 E_fisher = function(.mu, .sigma, .n, .a, .b) {
+  assert("Positive standard deviation: ",.sigma > 0)
+  assert("Left truncation before right truncation: ", .a < .b)
   
   Za = (.a - .mu) / .sigma
   Zb = (.b - .mu) / .sigma
@@ -699,6 +708,7 @@ E_fisher = function(.mu, .sigma, .n, .a, .b) {
 #' @param .b Right truncation limit.
 
 prior = function(.pars, .x, .a, .b) {
+  assert("Left truncation before right truncation: ", .a < .b)
   .mu = .pars[1]
   .sigma = .pars[2]
   
@@ -714,6 +724,8 @@ prior = function(.pars, .x, .a, .b) {
 #' @param .b Right truncation limit.
 
 neg_log_post = function(.pars, .x, .a, .b) {
+  assert("Positive standard deviation: ", pars[2] > 0)
+  assert("Left truncation before right truncation: ", .a < .b)
   .mu = .pars[1]
   .sigma = .pars[2]
   
