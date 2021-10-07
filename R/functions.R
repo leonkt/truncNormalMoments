@@ -2,6 +2,9 @@
 
 library(testthat)
 library(rstan)
+library(Deriv)
+library(truncnorm)
+library(testit)
 ################################ INTERMEDIATE TERMS ################################
 
 #' Returns the standardized lower truncation limit for a normal distribution.
@@ -49,14 +52,14 @@ alphal <- function(m, s, ul, uh) {
 #' @param s Standard deviation of normal distribution.
 #' @param ul Unstandardized lower truncation limit.
 #' @param uh Unstandardized upper truncation limit.
- 
+
 
 alphah <- function(m, s, ul, uh) {
   dnorm(ush(m,s,ul,uh)) / (pnorm(ush(m,s,ul,uh)) - pnorm(usl(m,s,ul,uh)))
 }
 
 #' Calculates factor of log-likelihood independent of the data.
-#' We assume that the data are distributed according to a normal distribution of mean m, standard 
+#' We assume that the data are distributed according to a normal distribution of mean m, standard
 #' deviation s, truncated at lower and upper limits, ul and uh, respectively.
 #'
 #' @param m Mean of normal distribution.
@@ -82,7 +85,7 @@ ll <- function(m, s, ul, uh, n) {
 samp_trunc <- function(nsamp, mu, sigma, ul, uh) {
   p_low <- pnorm(ul, mu, sigma)
   p_high <- pnorm(uh, mu, sigma)
-  
+
   # draw quantiles uniformly between the limits and pass these
   # to the relevant quantile function.
   qnorm(runif(nsamp, p_low, p_high), mu, sigma)
@@ -93,7 +96,7 @@ samp_trunc <- function(nsamp, mu, sigma, ul, uh) {
 #' Finds the derivative of the factor of log-likelihood independent of data.
 #'
 #' @param dstr Type of derivative to take. Consists of characters "m" and "s"
-#' @example 
+#' @example
 #' d_str should consist of the characters "m" and "s" indicating what types of partial derivatives to take.
 #' The length of d_str indicates the order of the derivative.
 #' For example, the following calculates the third-order derivative of log-likelihood with respect to mu, then sigma, then sigma.
@@ -127,7 +130,7 @@ get_deriv <- function(d_str) {
 #' @param s Standard deviation of underlying normal distributin.
 #' @param ul Unstandardized lower truncation limit.
 #' @param uh Unstandardized upper truncation limit.
-#' @example 
+#' @example
 #' d_str should consist of the characters "m" and "s" indicating what types of partial derivatives to take.
 #' The length of d_str indicates the order of the derivative.
 #' For example, the following calculates the third-order derivative of log-likelihood with respect to mu, then sigma, then sigma.
@@ -155,7 +158,7 @@ get_cumulants <- function(d_str, m, s, ul, uh, n) {
   # Third order cumulants.
   else if (nchar(d_str) == 3) {
     if (d_str == "mmm") {
-      deriv_no_x 
+      deriv_no_x
     }
     else if (d_str %in% c("mms", "msm", "smm")) {
       deriv_no_x + (2*n/s**3)
@@ -181,26 +184,26 @@ get_cumulants <- function(d_str, m, s, ul, uh, n) {
 #'
 #' @param d_str Cumulant to take the derivative of
 #' @param var Derivative of cumulant with respect to var
-#' 
+#'
 #' @example
-#' In each case, we make a function f. f is the sum of 
+#' In each case, we make a function f. f is the sum of
 #' (1) get_deriv(d_str), which gives an expression for the appropriate derivative of the LOG LIKELIHOOD WITHOUT THE X TERM.
 #' (2) expectation of the term involving x, in the appropriate derivative of the FULL LOG LIKELIHOOD.
-#' 
+#'
 #' For example:
 #' d^3\sigma/d\sigma^3 = (some terms not dependent on x) - (3/\sigma^4) * (\sum(x_i - \mu)^2).
-#' 
+#'
 #' Therefore, taking expectations will keep the terms not dependent on x the same, while changing the latter term dependent on x
-#' to -(3n/\sigma^4) * (\sigma(1 + usl * alphal - ush * alphah)). This sum is our cumulant, which we denote as f in the function. 
+#' to -(3n/\sigma^4) * (\sigma(1 + usl * alphal - ush * alphah)). This sum is our cumulant, which we denote as f in the function.
 #'
 #' We then take the derivative of f w.r.t var, since f is equal to the appropriate cumulant.
 
 get_cumulants_deriv <- function(d_str, var, m, s, ul, uh, n) {
 
-  
+
   cumulant_deriv <- function(d_str, var, m, s, ul, uh, n) {
     if (d_str == "mmm") {
-      
+
       Deriv(get_deriv(d_str), var)
     }
     else if (d_str %in% c("mms", "msm", "smm")) {
@@ -243,7 +246,7 @@ get_cumulants_deriv <- function(d_str, var, m, s, ul, uh, n) {
 }
 
 #' Finds the Fisher Information matrix on n observations from a truncated normal distribution.
-#' 
+#'
 #' @param m Mean of underlying normal distribution.
 #' @param s Standard deviation of underlying normal distribution.
 #' @param ul Lower truncation limit.
@@ -259,58 +262,58 @@ find_K <- function( m, s, ul, uh, n) {
 }
 
 #' Finds the A matrix from Godwin et al.
-#' 
+#'
 #' @param m Mean of underlying normal distribution.
 #' @param s Standard deviation of underlying normal distribution.
 #' @param ul Lower truncation limit.
 #' @param uh Upper truncation limit.
 #' @param n Number of observations.
-#' 
-#' @references 
-#' Ryan T. Godwin (2016) Bias reduction for the maximum likelihood estimator of the doubly-truncated Poisson distribution, 
+#'
+#' @references
+#' Ryan T. Godwin (2016) Bias reduction for the maximum likelihood estimator of the doubly-truncated Poisson distribution,
 #' Communications in Statistics - Theory and Methods, 45:7, 1887-1901, DOI: 10.1080/03610926.2013.867999
 
 find_A <- function( m, s, ul, uh, n) {
   a_mm_s = get_cumulants_deriv("mm", "s",  m, s, ul, uh, n) - 0.5 * get_cumulants("mms",  m, s, ul, uh, n)
   a_ms_s = get_cumulants_deriv("ms", "s",  m, s, ul, uh, n) - 0.5 * get_cumulants("mss",  m, s, ul, uh, n)
   a_ss_s = get_cumulants_deriv("ss", "s",  m, s, ul, uh, n) - 0.5 * get_cumulants("sss",  m, s, ul, uh, n)
-  
+
   a_mm_m = get_cumulants_deriv("mm", "m",  m, s, ul, uh, n) - 0.5 * get_cumulants("mmm",  m, s, ul, uh, n)
   a_ms_m = get_cumulants_deriv("ms", "m",  m, s, ul, uh, n) - 0.5 * get_cumulants("msm",  m, s, ul, uh, n)
   a_ss_m = get_cumulants_deriv("ss", "m",  m, s, ul, uh, n) - 0.5 * get_cumulants("ssm",  m, s, ul, uh, n)
-  
+
   A_mu = matrix(c(a_mm_m, a_ms_m, a_ms_m, a_ss_m), nrow=2, ncol=2, byrow=TRUE)
   A_sigma = matrix(c(a_mm_s, a_ms_s, a_ms_s, a_ss_s), nrow=2, ncol=2, byrow=TRUE)
   cbind(A_mu, A_sigma)
 }
 
-#' Applies the bias correction, K^{-1}AK, of Godwin et al. and 
+#' Applies the bias correction, K^{-1}AK, of Godwin et al. and
 #' calculates bias of the bias-corrected MLE.
-#' 
+#'
 #' @param m Mean of underlying normal distribution.
 #' @param s Standard deviation of underlying normal distribution.
 #' @param ul Lower truncation limit.
 #' @param uh Upper truncation limit.
 #' @param n Number of observations.
 #' @param sim.reps Number of repetitions to estimate bias of the bias-corrected MLE.
-#' 
-#' @references 
-#' Ryan T. Godwin (2016) Bias reduction for the maximum likelihood estimator of the doubly-truncated Poisson distribution, 
+#'
+#' @references
+#' Ryan T. Godwin (2016) Bias reduction for the maximum likelihood estimator of the doubly-truncated Poisson distribution,
 #' Communications in Statistics - Theory and Methods, 45:7, 1887-1901, DOI: 10.1080/03610926.2013.867999
 
 calculate_bias <- function( m, s, ul, uh, n, sim.reps) {
-  
+
   K <- find_K( m, s, ul, uh, n)
   A <- find_A( m, s, ul, uh, n)
   bias <- inv(K) %*% A %*% c(inv(K))
   # vectors of standard MLEs
   means_b <- c()
   stddevs_b <- c()
-  
+
   # vectors of Cordeira-corrected MLEs
   means_ub <- c()
   stddevs_ub <- c()
-  
+
   # run simulation
   for (i in 1:sim.reps) {
     samps <- samp_trunc(n, m, s, ul, uh)
@@ -322,17 +325,17 @@ calculate_bias <- function( m, s, ul, uh, n, sim.reps) {
     mle_stddev <- sqrt(mles["sigma_1.1"])
     params_b <- c(mle_mean, mle_stddev)
     params_ub <- c(mle_mean, mle_stddev) - bias
-    
+
     means_b <- c(means_b, params_b[1])
     stddevs_b <- c(stddevs_b, params_b[2])
-    
+
     means_ub <- c(means_ub, params_ub[1])
     stddevs_ub <- c(stddevs_ub, params_ub[2])
   }
-  
+
   if (type == "meanub") {
     mean(means_ub-m)
-    
+
   }
   else if (type == "meanb") {
     mean(means_b-m)
@@ -346,12 +349,13 @@ calculate_bias <- function( m, s, ul, uh, n, sim.reps) {
 }
 
 #' Ensures that the cumulants calculated in the Deriv package match those calculated by hand.
-#' 
+#' PUT IN TEST_MOMENTS.R
 #' @param m Mean of underlying normal distribution.
 #' @param s Standard deviation of underlying normal distribution.
 #' @param ul Lower truncation limit.
 #' @param uh Upper truncation limit.
 #' @param n Number of observations.
+
 
 cumulants_check <- function(m, s, ul, uh, n) {
   epsilon = 0.000001
@@ -365,32 +369,32 @@ cumulants_check <- function(m, s, ul, uh, n) {
   }
   # Theoretical derivation of cumulants
   d_mm = -(n/s**2) + (n/s**2) * ((alphah(m, s, ul, uh) - alphal(m, s, ul, uh)) ** 2 + alphah(m, s, ul, uh) * ush(m, s, ul, uh) - alphal(m, s, ul, uh) * usl(m, s, ul, uh))
-  
+
   d_sm =  (-2 * n/s**3) * Ex_min_m(m,s,ul,uh) + (n/s**2) * (alphal(m, s, ul, uh) - alphah(m, s, ul, uh) + alphah(m, s, ul, uh) * ush(m, s, ul, uh) **2 - alphal(m, s, ul, uh) * usl(m, s, ul, uh)**2 + (alphal(m, s, ul, uh) - alphah(m, s, ul, uh)) * (alphal(m, s, ul, uh)*usl(m, s, ul, uh) - alphah(m, s, ul, uh) * ush(m, s, ul, uh)) )
-  
+
   d_ss = (n/s**2) - (3 * n/s**4) * Ex_min_m_sq(m, s, ul, uh) + n * ((ush(m, s, ul, uh) * alphah(m, s, ul, uh)/s**2 ) * (ush(m, s, ul, uh) **2 - 2) - (usl(m, s, ul, uh)  * alphal(m, s, ul, uh) / s**2) * (usl(m, s, ul, uh) **2 - 2) + ((alphah(m, s, ul, uh) * ush(m, s, ul, uh) - alphal(m, s, ul, uh) * usl(m, s, ul, uh) )**2)/s**2)
-  
+
   # Ensures that the value of the cumulants we get from get_cumulants match the derived value of the cumulants.
   assert("mm check:", get_cumulants("mm", m, s, ul, uh, n) -  epsilon <= d_mm && d_mm <= get_cumulants("mm", m, s, ul, uh, n) + epsilon)
   assert("ss check:", get_cumulants("ss", m, s, ul, uh, n) -  epsilon <= d_ss && d_ss <= get_cumulants("ss", m, s, ul, uh, n) + epsilon)
   assert("sm check:", get_cumulants("sm", m, s, ul, uh, n) -  epsilon <= d_sm && d_sm <= get_cumulants("sm", m, s, ul, uh, n) + epsilon)
-  
+
 }
 
 
 
 #' Calculates the Cordiero bias-correction for the MLE of the mean and standard deviation of a
 #' doubly-truncated normal.
-#' 
+#'
 #' @param m Mean of underlying normal distribution.
 #' @param s Standard deviation of underlying normal distribution.
 #' @param ul Lower truncation limit.
 #' @param uh Upper truncation limit.
 #' @param n Number of observations.
-#' 
+#'
 cordeiro_bias = function(.m, .s, .ul, .uh, .n) {
   if (.s <= 0) {
-    
+
   }
   K <- find_K( m=.m, s=.s, ul=.ul, uh=.uh, n=.n)
   A <- find_A( m=.m, s=.s, ul=.ul, uh=.uh, n=.n)
@@ -399,74 +403,75 @@ cordeiro_bias = function(.m, .s, .ul, .uh, .n) {
 }
 
 #' Auxillary function to calculate the negative log posterior with Jeffrey's prior.
-#' 
+#'
 #' @param .pars Vector of parameters specifying mu and sigma.
 #' @param par2is "sd" if the second entry in .pars is the standard deviation, and "var" otherwise.
 #' @param .x Data to use log likelihood calculation.
 #' @param .a Left truncation limit.
 #' @param .b Right truncation limit.
+
 nlpost_Jeffreys = function(.pars, par2is = "sd", .x, .a, .b) {
   assert("Left truncation is before right truncation" , .a < b )
   # variance parameterization
   if (par2is == "var") {
-    
+
     .mu = .pars[1]
     .var = .pars[2]
-    
+
     if ( .var < 0 ) return(.Machine$integer.max)
-    
+
     # as in nll()
     term1 = dmvnorm(x = as.matrix(.x, nrow = 1),
                     mean = as.matrix(.mu, nrow = 1),
                     # sigma here is covariance matrix
                     sigma = as.matrix(.var, nrow=1),
                     log = TRUE)
-    
-    
+
+
     term2 = length(.x) * log( pmvnorm(lower = .a,
                                       upper = .b,
                                       mean = .mu,
                                       # remember sigma here is covariance matrix, not the SD
-                                      sigma = .var ) ) 
-    
+                                      sigma = .var ) )
+
     term3 = log( sqrt( det( E_fisher(.mu = .mu, .sigma = sqrt(.var), .n = length(.x), .a = .a, .b = .b) ) ) )
-    
+
     nlp.value = -( sum(term1) - term2 + term3 )
-    
+
     if ( is.infinite(nlp.value) | is.na(nlp.value) ) return(.Machine$integer.max)
   }
-  
+
   # SD parameterization
   if (par2is == "sd") {
-    
+
     .mu = .pars[1]
     .sigma = .pars[2]
-    
+
     if ( .sigma < 0 ) return(.Machine$integer.max)
-    
+
     # as in nll()
     term1 = dmvnorm(x = as.matrix(.x, nrow = 1),
                     mean = as.matrix(.mu, nrow = 1),
                     # sigma here is covariance matrix,
                     sigma = as.matrix(.sigma^2, nrow=1),
                     log = TRUE)
-    
-    
+
+
     term2 = length(.x) * log( pmvnorm(lower = .a,
                                       upper = .b,
                                       mean = .mu,
                                       # remember sigma here is covariance matrix, not the SD
-                                      sigma = .sigma^2 ) ) 
-    
+                                      sigma = .sigma^2 ) )
+
     term3 = log( sqrt( det( E_fisher(.mu = .mu, .sigma = .sigma, .n = length(.x), .a = .a, .b = .b) ) ) )
-    
+
     nlp.value = -( sum(term1) - term2 + term3 )
-    
+
     if ( is.infinite(nlp.value) | is.na(nlp.value) ) return(.Machine$integer.max)
   }
-  
+
   nlp.value
-  
+
 }
 
 #' Finds the MAP estimates for mu and sigma of the full normal distribution, given data from a truncated normal.
@@ -475,12 +480,31 @@ nlpost_Jeffreys = function(.pars, par2is = "sd", .x, .a, .b) {
 #' @param p Vector of parameters containing truncation points and number of observations.
 #' @param mu.start Initial value for mu.
 #' @param sigma.start Initial value for sigma.
-#' @param ci.left String formatted as "X%". Left end of a confidence interval for each parameter estimate. 
-#' @param ci.right String formatted as "X%". Right end of a confidence interval for each parameter estimate. 
+#' @param ci.left String formatted as "X%". Left end of a confidence interval for each parameter estimate.
+#' @param ci.right String formatted as "X%". Right end of a confidence interval for each parameter estimate.
 #'
+#' @example
+#' Pass in specific settings to sampling() via ellipsis.
+#'
+#' n <- 100
+#' a <- 1
+#' b <- 2
+#' iter <- 5000
+#' max_treedepth <- 10
+#'
+#' # Notice that everything following ci.right is there as part of the ellipsis.
+#' # These are optional, and will be passed directly into sampling(). See references
+#' # for additional information regarding sampling().
+#' estimate_jeffreys_mcmc(x, mu.start, sigma.start, ci.left, ci.right,
+#'                        data = list( n = , LL = p$a, UU = p$b),
+#'                        iter = p$stan.iter,
+#'                        control = list(max_treedepth))
+#'
+#' @references
+#' https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html
 
 estimate_jeffreys_mcmc = function(x,
-                                  p,
+                                  #p,
                                   mu.start,
                                   sigma.start,
                                   ci.left,
@@ -500,33 +524,33 @@ functions{
 		real kms;
 		real kss;
 		matrix[2,2] fishinfo;
-		
+
 		mustarL = (LL - mu) / sigma;
 		mustarU = (UU - mu) / sigma;
 		// note that normal_lpdf, etc., parameterize in terms of SD, not var
 		//  the (0,1) below are *not* start values for MCMC
-		alphaL = exp( normal_lpdf(mustarL | 0, 1) - 
+		alphaL = exp( normal_lpdf(mustarL | 0, 1) -
 	                log_diff_exp( normal_lcdf(mustarU | 0, 1),
-	                normal_lcdf(mustarL | 0, 1) ) ); 
-	                
-		alphaU = exp( normal_lpdf(mustarU | 0, 1) - 
+	                normal_lcdf(mustarL | 0, 1) ) );
+
+		alphaU = exp( normal_lpdf(mustarU | 0, 1) -
  	                log_diff_exp( normal_lcdf(mustarU | 0, 1),
  	                normal_lcdf(mustarL | 0, 1) ) );
-		
-		// second derivatives for Fisher info			
+
+		// second derivatives for Fisher info
 		kmm = -n/sigma^2 + n/sigma^2 * ((alphaU-alphaL)^2 + alphaU*mustarU- alphaL*mustarL);
-		kms = -2*n/sigma^2 * (alphaL - alphaU) + 
+		kms = -2*n/sigma^2 * (alphaL - alphaU) +
 	   		  n/sigma^2 * (alphaL - alphaU + (alphaU*mustarU^2 - alphaL*mustarL^2) +
 			  				(alphaL-alphaU) * (alphaL*mustarL - alphaU*mustarU));
 		kss = n/sigma^2 - 3*n/sigma^2 * (1 + mustarL*alphaL - mustarU*alphaU) +
 	   			n/sigma^2 * (mustarU*alphaU*(mustarU^2 - 2) - mustarL*alphaL*(mustarL^2 - 2) +
 								(alphaU*mustarU - alphaL*mustarL)^2);
-		
+
 		fishinfo[1,1] = -kmm;
 		fishinfo[1,2] = -kms;
 		fishinfo[2,1] = -kms;
 		fishinfo[2,2] = -kss;
-		
+
 		return sqrt(determinant(fishinfo));
 	}
 }
@@ -550,7 +574,7 @@ generated quantities{
   real log_prior = log(jeffreys_prior(mu, sigma, LL, UU, n));
   real log_post;
   log_lik = normal_lpdf(y | mu, sigma);
-  log_lik += -n * log_diff_exp( normal_lcdf(UU | mu, sigma), normal_lcdf(LL | mu, sigma) );  							 
+  log_lik += -n * log_diff_exp( normal_lcdf(UU | mu, sigma), normal_lcdf(LL | mu, sigma) );
   log_post = log_lik + log_prior;
 }
 "
@@ -565,24 +589,23 @@ init.fcn <- function(o){ list(mu=mu.start, sigma=sigma.start) }
 # like tryCatch, but captures warnings without stopping the function from
 #  returning its results
 withCallingHandlers({
-  
+
   # "isystem" arg is just a placeholder to avoid Stan's not understanding special characters
   #  in getwd(), even though we don't actually use the dir at all
   stan.model <- stan_model(model_code = model.text,
-                           isystem = "~/Desktop", ...)
-  
+                           isystem = "~/Desktop")
+
   post = sampling(stan.model,
                   cores = 1,
                   refresh = 0,
-                  data = list( n = p$n, LL = p$a, UU = p$b, y = x ),
-                  
-                  iter = p$stan.iter,   
-                  control = list(max_treedepth = p$stan.maxtreedepth,
-                                 adapt_delta = p$stan.adapt_delta),
-                  
-                  init = init.fcn)
-  
-  
+                  #data = list( n = p$n, LL = p$a, UU = p$b, y = x ),
+
+                  #iter = p$stan.iter,
+                  #control = list(max_treedepth = p$stan.maxtreedepth,
+                                 #adapt_delta = p$stan.adapt_delta),
+                  init = init.fcn, ...)
+
+
 }, warning = function(condition){
   stan.warned <<- 1
   stan.warning <<- condition$message
@@ -592,10 +615,10 @@ withCallingHandlers({
 postSumm = summary(post)$summary
 
 
-nlpost_simple = function(.mu, .sigma) {
+nlpost_simple = function(.mu, .sigma, par2is, x, a, b) {
   nlpost.value = nlpost_Jeffreys(.pars = c(.mu, .sigma),
                                  par2is = par2is,
-                                 .x = x, .a = p$a, .b = p$b)
+                                 .x = x, .a = a, .b = b)
   return(nlpost.value)
 }
 
@@ -622,7 +645,7 @@ expect_equal( Mhat[1], mean( rstan::extract(post, "mu")[[1]] ) )
 MhatSE = postSumm["mu", "se_mean"]
 ShatSE = postSumm["sigma", "se_mean"]
 # because VhatSE uses delta method, VhatSE will be length 2 because Shat is length 2
-VhatSE = ShatSE * 2 * Shat  
+VhatSE = ShatSE * 2 * Shat
 # how Stan estimates the SE: https://discourse.mc-stan.org/t/se-mean-in-print-stanfit/2869
 #expect_equal( postSumm["mu", "sd"], sd( rstan::extract(post, "mu")[[1]] ) )
 #expect_equal( MhatSE,postSumm["mu", "sd"] / sqrt( postSumm["mu", "n_eff"] ) )
@@ -648,20 +671,20 @@ return( list( post = post,
               Mhat = Mhat,
               Vhat = Vhat,
               Shat = Shat,
-              
+
               map = maps,
-              
+
               MhatSE = rep(MhatSE, 2),
               VhatSE = VhatSE,  # already length 2 (see above)
               ShatSE = rep(ShatSE, 2),
-              
+
               M.CI = M.CI,
               V.CI = V.CI,
               S.CI = S.CI,
-              
+
               stan.warned = stan.warned,
               stan.warning = stan.warning,
-              
+
               MhatRhat = postSumm["mu", "Rhat"],
               ShatRhat = postSumm["sigma", "Rhat"]
 ) )
@@ -678,23 +701,23 @@ return( list( post = post,
 E_fisher = function(.mu, .sigma, .n, .a, .b) {
   assert("Positive standard deviation: ",.sigma > 0)
   assert("Left truncation before right truncation: ", .a < .b)
-  
+
   Za = (.a - .mu) / .sigma
   Zb = (.b - .mu) / .sigma
-  
+
   alpha.a = dnorm(Za) / ( pnorm(Zb) - pnorm(Za) )
   alpha.b = dnorm(Zb) / ( pnorm(Zb) - pnorm(Za) )
-  
+
   k11 = -(.n/.sigma^2) + (.n/.sigma^2)*( (alpha.b - alpha.a)^2 + (alpha.b*Zb - alpha.a*Za) )
-  
+
   k12 = -( 2*.n*(alpha.a - alpha.b) / .sigma^2 ) +
     (.n/.sigma^2)*( alpha.a - alpha.b + alpha.b*Zb^2 - alpha.a*Za^2 +
                       (alpha.a - alpha.b)*(alpha.a*Za - alpha.b*Zb) )
-  
+
   k22 = (.n/.sigma^2) - (3*.n*(1 + alpha.a*Za - alpha.b*Zb) / .sigma^2) +
     (.n/.sigma^2)*( Zb*alpha.b*(Zb^2 - 2) - Za*alpha.a*(Za^2 - 2) +
                       (alpha.b*Zb - alpha.a*Za)^2 )
-  
+
   return( matrix( c(-k11, -k12, -k12, -k22),
                   nrow = 2,
                   byrow = TRUE ) )
@@ -711,7 +734,7 @@ prior = function(.pars, .x, .a, .b) {
   assert("Left truncation before right truncation: ", .a < .b)
   .mu = .pars[1]
   .sigma = .pars[2]
-  
+
 
   return (log( sqrt( det( E_fisher(.mu = .mu, .sigma = .sigma, .n = length(.x), .a = .a, .b = .b) ) ) ))
 }
@@ -724,11 +747,11 @@ prior = function(.pars, .x, .a, .b) {
 #' @param .b Right truncation limit.
 
 neg_log_post = function(.pars, .x, .a, .b) {
-  assert("Positive standard deviation: ", pars[2] > 0)
+  assert("Positive standard deviation: ", .pars[2] > 0)
   assert("Left truncation before right truncation: ", .a < .b)
   .mu = .pars[1]
   .sigma = .pars[2]
-  
+
   # regular LL part
   -sum( log( dtruncnorm(x = .x, a = .a, b = .b, mean = .mu, sd = .sigma) ) ) -
     # Jeffreys part
