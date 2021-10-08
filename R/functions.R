@@ -483,7 +483,7 @@ nlpost_Jeffreys = function(.pars, par2is = "sd", .x, .a, .b) {
 #' @param ci.left String formatted as "X%". Left end of a confidence interval for each parameter estimate.
 #' @param ci.right String formatted as "X%". Right end of a confidence interval for each parameter estimate.
 #'
-#' @example
+#' @examples
 #' Pass in specific settings to sampling() via ellipsis.
 #'
 #' n <- 100
