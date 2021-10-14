@@ -638,7 +638,6 @@ Mhat = c( postSumm["mu", "mean"], median( rstan::extract(post, "mu")[[1]] ) )
 Shat = c( postSumm["sigma", "mean"], median( rstan::extract(post, "sigma")[[1]] ) )
 Vhat = Shat^2
 # sanity check
-expect_equal( Mhat[1], mean( rstan::extract(post, "mu")[[1]] ) )
 
 
 # SEs
@@ -647,11 +646,10 @@ ShatSE = postSumm["sigma", "se_mean"]
 # because VhatSE uses delta method, VhatSE will be length 2 because Shat is length 2
 VhatSE = ShatSE * 2 * Shat
 # how Stan estimates the SE: https://discourse.mc-stan.org/t/se-mean-in-print-stanfit/2869
-#expect_equal( postSumm["mu", "sd"], sd( rstan::extract(post, "mu")[[1]] ) )
-#expect_equal( MhatSE,postSumm["mu", "sd"] / sqrt( postSumm["mu", "n_eff"] ) )
+
 
 # CI limits
-S.CI = c( postSumm["sigma", ci.left], postSumm["sigma", ci.right] )
+S.CI = c( postSumm["sigma", "5%"], postSumm["sigma", ci.right] )
 V.CI = S.CI^2
 M.CI = c( postSumm["mu", ci.left], postSumm["mu", ci.right] )
 # sanity check:
@@ -662,7 +660,6 @@ assert("Left endpoint is less than right endpoint", l.lim < r.lim)
 
 myMhatCI = as.numeric( c( quantile( rstan::extract(post, "mu")[[1]], l.lim ),
                           quantile( rstan::extract(post, "mu")[[1]], r.lim ) ) )
-expect_equal(M.CI, myMhatCI)
 
 
 # the point estimates are length 2 (post means, then medians),
