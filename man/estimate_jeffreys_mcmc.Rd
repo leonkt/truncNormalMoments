@@ -22,24 +22,6 @@ estimate_jeffreys_mcmc(x, mu.start, sigma.start, ci.left, ci.right, ...)
 \description{
 Finds the MAP estimates for mu and sigma of the full normal distribution, given data from a truncated normal.
 }
-\examples{
-Pass in specific settings to sampling() via ellipsis.
-
-n <- 100
-a <- 1
-b <- 2
-iter <- 5000
-max_treedepth <- 10
-
-# Notice that everything following ci.right is there as part of the ellipsis.
-# These are optional, and will be passed directly into sampling(). See references
-# for additional information regarding sampling().
-estimate_jeffreys_mcmc(x, mu.start, sigma.start, ci.left, ci.right,
-                       data = list( n = , LL = p$a, UU = p$b),
-                       iter = p$stan.iter,
-                       control = list(max_treedepth))
-
-}
 \references{
 https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html
 }

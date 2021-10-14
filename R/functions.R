@@ -12,8 +12,8 @@ library(testit)
 #' @param m Mean of normal distribution.
 #' @param s Standard deviation of normal distribution.
 #' @param ul Unstandardized lower truncation limit.
-#' @examples
-#' Returns the z-score of the value 1, for a normal distribution of mean 0, standard deviation 2.
+#' @example
+#' #Returns the z-score of the value 1, for a normal distribution of mean 0, standard deviation 2.
 #' usl(0, 2, 1)
 #'
 
@@ -26,8 +26,8 @@ usl <- function(m,s,ul,uh) {
 #' @param m Mean of normal distribution.
 #' @param s Standard deviation of normal distribution.
 #' @param uh Unstandardized upper truncation limit.
-#' @examples
-#' Returns the z-score of the value 1, for a normal distribution of mean 0, standard deviation 2.
+#' @example
+#' # Returns the z-score of the value 1, for a normal distribution of mean 0, standard deviation 2.
 #' ush(0, 2, 1)
 
 ush <- function(m,s,ul,uh) {
@@ -97,9 +97,9 @@ samp_trunc <- function(nsamp, mu, sigma, ul, uh) {
 #'
 #' @param dstr Type of derivative to take. Consists of characters "m" and "s"
 #' @example
-#' d_str should consist of the characters "m" and "s" indicating what types of partial derivatives to take.
-#' The length of d_str indicates the order of the derivative.
-#' For example, the following calculates the third-order derivative of log-likelihood with respect to mu, then sigma, then sigma.
+#' # d_str should consist of the characters "m" and "s" indicating what types of partial derivatives to take.
+#' # The length of d_str indicates the order of the derivative.
+#' # For example, the following calculates the third-order derivative of log-likelihood with respect to mu, then sigma, then sigma.
 #' d_str = "mss"
 #' get_deriv(d_str)
 
@@ -131,9 +131,9 @@ get_deriv <- function(d_str) {
 #' @param ul Unstandardized lower truncation limit.
 #' @param uh Unstandardized upper truncation limit.
 #' @example
-#' d_str should consist of the characters "m" and "s" indicating what types of partial derivatives to take.
-#' The length of d_str indicates the order of the derivative.
-#' For example, the following calculates the third-order derivative of log-likelihood with respect to mu, then sigma, then sigma.
+#' # d_str should consist of the characters "m" and "s" indicating what types of partial derivatives to take.
+#' # The length of d_str indicates the order of the derivative.
+#' # For example, the following calculates the third-order derivative of log-likelihood with respect to mu, then sigma, then sigma.
 #' d_str = "mss"
 #' get_cumulants(d_str, 0, 1, 0, 1)
 
@@ -186,17 +186,17 @@ get_cumulants <- function(d_str, m, s, ul, uh, n) {
 #' @param var Derivative of cumulant with respect to var
 #'
 #' @example
-#' In each case, we make a function f. f is the sum of
-#' (1) get_deriv(d_str), which gives an expression for the appropriate derivative of the LOG LIKELIHOOD WITHOUT THE X TERM.
-#' (2) expectation of the term involving x, in the appropriate derivative of the FULL LOG LIKELIHOOD.
+#' # In each case, we make a function f. f is the sum of
+#' # (1) get_deriv(d_str), which gives an expression for the appropriate derivative of the LOG LIKELIHOOD WITHOUT THE X TERM.
+#' # (2) expectation of the term involving x, in the appropriate derivative of the FULL LOG LIKELIHOOD.
 #'
-#' For example:
-#' d^3\sigma/d\sigma^3 = (some terms not dependent on x) - (3/\sigma^4) * (\sum(x_i - \mu)^2).
+#' #For example:
+#' # d^3\sigma/d\sigma^3 = (some terms not dependent on x) - (3/\sigma^4) * (\sum(x_i - \mu)^2).
 #'
-#' Therefore, taking expectations will keep the terms not dependent on x the same, while changing the latter term dependent on x
-#' to -(3n/\sigma^4) * (\sigma(1 + usl * alphal - ush * alphah)). This sum is our cumulant, which we denote as f in the function.
+#' # Therefore, taking expectations will keep the terms not dependent on x the same, while changing the latter term dependent on x
+#' # to -(3n/\sigma^4) * (\sigma(1 + usl * alphal - ush * alphah)). This sum is our cumulant, which we denote as f in the function.
 #'
-#' We then take the derivative of f w.r.t var, since f is equal to the appropriate cumulant.
+#' #We then take the derivative of f w.r.t var, since f is equal to the appropriate cumulant.
 
 get_cumulants_deriv <- function(d_str, var, m, s, ul, uh, n) {
 
@@ -348,39 +348,6 @@ calculate_bias <- function( m, s, ul, uh, n, sim.reps) {
   }
 }
 
-#' Ensures that the cumulants calculated in the Deriv package match those calculated by hand.
-#' PUT IN TEST_MOMENTS.R
-#' @param m Mean of underlying normal distribution.
-#' @param s Standard deviation of underlying normal distribution.
-#' @param ul Lower truncation limit.
-#' @param uh Upper truncation limit.
-#' @param n Number of observations.
-
-
-cumulants_check <- function(m, s, ul, uh, n) {
-  epsilon = 0.000001
-  # Calculates E(x-mu)
-  Ex_min_m <- function( m, s, ul, uh) {
-    (s * (alphal( m, s, ul, uh) - alphah( m, s, ul, uh)) )
-  }
-  # Calculates E(x-mu)^2
-  Ex_min_m_sq <- function(m, s, ul, uh) {
-    (s**2 * (1 + usl(m, s, ul, uh) * alphal(m, s, ul, uh) - ush(m, s, ul, uh) * alphah(m, s, ul, uh)) )
-  }
-  # Theoretical derivation of cumulants
-  d_mm = -(n/s**2) + (n/s**2) * ((alphah(m, s, ul, uh) - alphal(m, s, ul, uh)) ** 2 + alphah(m, s, ul, uh) * ush(m, s, ul, uh) - alphal(m, s, ul, uh) * usl(m, s, ul, uh))
-
-  d_sm =  (-2 * n/s**3) * Ex_min_m(m,s,ul,uh) + (n/s**2) * (alphal(m, s, ul, uh) - alphah(m, s, ul, uh) + alphah(m, s, ul, uh) * ush(m, s, ul, uh) **2 - alphal(m, s, ul, uh) * usl(m, s, ul, uh)**2 + (alphal(m, s, ul, uh) - alphah(m, s, ul, uh)) * (alphal(m, s, ul, uh)*usl(m, s, ul, uh) - alphah(m, s, ul, uh) * ush(m, s, ul, uh)) )
-
-  d_ss = (n/s**2) - (3 * n/s**4) * Ex_min_m_sq(m, s, ul, uh) + n * ((ush(m, s, ul, uh) * alphah(m, s, ul, uh)/s**2 ) * (ush(m, s, ul, uh) **2 - 2) - (usl(m, s, ul, uh)  * alphal(m, s, ul, uh) / s**2) * (usl(m, s, ul, uh) **2 - 2) + ((alphah(m, s, ul, uh) * ush(m, s, ul, uh) - alphal(m, s, ul, uh) * usl(m, s, ul, uh) )**2)/s**2)
-
-  # Ensures that the value of the cumulants we get from get_cumulants match the derived value of the cumulants.
-  assert("mm check:", get_cumulants("mm", m, s, ul, uh, n) -  epsilon <= d_mm && d_mm <= get_cumulants("mm", m, s, ul, uh, n) + epsilon)
-  assert("ss check:", get_cumulants("ss", m, s, ul, uh, n) -  epsilon <= d_ss && d_ss <= get_cumulants("ss", m, s, ul, uh, n) + epsilon)
-  assert("sm check:", get_cumulants("sm", m, s, ul, uh, n) -  epsilon <= d_sm && d_sm <= get_cumulants("sm", m, s, ul, uh, n) + epsilon)
-
-}
-
 
 
 #' Calculates the Cordiero bias-correction for the MLE of the mean and standard deviation of a
@@ -483,10 +450,9 @@ nlpost_Jeffreys = function(.pars, par2is = "sd", .x, .a, .b) {
 #' @param ci.left String formatted as "X%". Left end of a confidence interval for each parameter estimate.
 #' @param ci.right String formatted as "X%". Right end of a confidence interval for each parameter estimate.
 #'
-#' @examples
-#' Pass in specific settings to sampling() via ellipsis.
+#' @example
 #'
-#' n <- 100
+#' n <- 3
 #' a <- 1
 #' b <- 2
 #' iter <- 5000
@@ -495,15 +461,14 @@ nlpost_Jeffreys = function(.pars, par2is = "sd", .x, .a, .b) {
 #' # Notice that everything following ci.right is there as part of the ellipsis.
 #' # These are optional, and will be passed directly into sampling(). See references
 #' # for additional information regarding sampling().
-#' estimate_jeffreys_mcmc(x, mu.start, sigma.start, ci.left, ci.right,
-#'                        data = list( n = , LL = p$a, UU = p$b),
-#'                        iter = p$stan.iter,
-#'                        control = list(max_treedepth))
+#' estimate_jeffreys_mcmc(x=c(1.2,2.2,3.2), mu.start, sigma.start, "5%", ci.right="95%",
+#'                        data = list( n = n, LL = a, UU = b),
+#'                        iter = 10)
 #'
 #' @references
 #' https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html
 
-estimate_jeffreys_mcmc = function(x,
+estimate_jeffreys_mcmc <- function(x,
                                   #p,
                                   mu.start,
                                   sigma.start,

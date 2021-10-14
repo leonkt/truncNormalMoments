@@ -16,8 +16,3 @@ usl(m, s, ul, uh)
 \description{
 Returns the standardized lower truncation limit for a normal distribution.
 }
-\examples{
-Returns the z-score of the value 1, for a normal distribution of mean 0, standard deviation 2.
-usl(0, 2, 1)
-
-}

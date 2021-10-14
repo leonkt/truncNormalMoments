@@ -16,7 +16,3 @@ ush(m, s, ul, uh)
 \description{
 Returns the standardized upper truncation limit for a normal distribution.
 }
-\examples{
-Returns the z-score of the value 1, for a normal distribution of mean 0, standard deviation 2.
-ush(0, 2, 1)
-}
