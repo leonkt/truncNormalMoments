@@ -443,10 +443,13 @@ nlpost_Jeffreys = function(.pars, par2is = "sd", .x, .a, .b) {
 
 #' Finds the MAP estimates for mu and sigma of the full normal distribution, given data from a truncated normal.
 #'
-#' @param x Data from truncated normal
+#' @param x Vector of from truncated normal
+#' MM: Trunc points needs to be their own args, and user shouldn't have to specify n because it's just length(x)
 #' @param p Vector of parameters containing truncation points and number of observations.
+#' MM: Let's use "mean" and "sd" in names of args and output for user instead of "mu" and "sigma"
 #' @param mu.start Initial value for mu.
 #' @param sigma.start Initial value for sigma.
+#' MM: Let's format ci.left and ci.right as a single numerical arg, ci.level (default 0.95), and assume they want symmetric
 #' @param ci.left String formatted as "X%". Left end of a confidence interval for each parameter estimate.
 #' @param ci.right String formatted as "X%". Right end of a confidence interval for each parameter estimate.
 #'
@@ -458,6 +461,7 @@ nlpost_Jeffreys = function(.pars, par2is = "sd", .x, .a, .b) {
 #' iter <- 5000
 #' max_treedepth <- 10
 #'
+#' MM: This example will break b/c mu.start and sigma.start aren't def'd
 #' # Notice that everything following ci.right is there as part of the ellipsis.
 #' # These are optional, and will be passed directly into sampling(). See references
 #' # for additional information regarding sampling().
@@ -631,9 +635,11 @@ myMhatCI = as.numeric( c( quantile( rstan::extract(post, "mu")[[1]], l.lim ),
 #  but the inference is the same for each type of point estimate
 return( list( post = post,
               Mhat = Mhat,
+              # MM: Let's get rid of everything about Vhat and call the returned Mhat and Shat "mean.est", "sd.est", etc., throughout, to sync up terminology
               Vhat = Vhat,
               Shat = Shat,
 
+              # MM: why is this separate from Mhat, Shat above?
               map = maps,
 
               MhatSE = rep(MhatSE, 2),
@@ -653,7 +659,7 @@ return( list( post = post,
 }
 
 #' Finds the Fisher information matrix contained in n samples from a truncated normal distribution.
-#'
+#' MM: Keep names of args sycned for all fns (see my comments in estimate_jeffreys_mcmc above)
 #' @param .mu Mean of underlying normal distribution.
 #' @param .sigma Standard deviation of underlying normal distribution.
 #' @param .n Number of observations.
