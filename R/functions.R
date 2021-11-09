@@ -485,8 +485,8 @@ nlpost_Jeffreys = function(.pars, par2is = "sd", .x, .a, .b) {
 #' https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html
 
 estimate_jeffreys_mcmc <- function(x,
-                                  mean.start,
-                                  sd.start,
+                                  mean.start = 0,
+                                  sd.start = 1,
                                   ci.left,
                                   ci.right,
                                   ...) {
