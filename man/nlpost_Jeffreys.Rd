@@ -4,12 +4,10 @@
 \alias{nlpost_Jeffreys}
 \title{Auxillary function to calculate the negative log posterior with Jeffrey's prior.}
 \usage{
-nlpost_Jeffreys(.pars, par2is = "sd", .x, .a, .b)
+nlpost_Jeffreys(.pars, .x, .a, .b)
 }
 \arguments{
-\item{.pars}{Vector of parameters specifying mu and sigma.}
-
-\item{par2is}{"sd" if the second entry in .pars is the standard deviation, and "var" otherwise.}
+\item{.pars}{Vector of parameters specifying mean and standard deviation.}
 
 \item{.x}{Data to use log likelihood calculation.}
 

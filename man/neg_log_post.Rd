@@ -7,7 +7,7 @@
 neg_log_post(.pars, .x, .a, .b)
 }
 \arguments{
-\item{.pars}{Vector of parameters specifying mu and sigma.}
+\item{.pars}{Vector specifying mu and sigma.}
 
 \item{.x}{Data to use log likelihood calculation.}
 

@@ -90,6 +90,7 @@ ll <- function(.mean, .sd, ul, uh, n) {
 #' # For example, the following calculates the third-order derivative of log-likelihood with respect to mu, then sigma, then sigma.
 #' d_str = "mss"
 #' get_deriv(d_str)
+#' @importFrom Deriv Deriv
 
 get_deriv <- function(d_str) {
   # First order derivatives of the ll without the X term.
@@ -125,6 +126,8 @@ get_deriv <- function(d_str) {
 #' # For example, the following calculates the third-order derivative of log-likelihood with respect to mu, then sigma, then sigma.
 #' d_str = "mss"
 #' get_cumulants(d_str, 0, 1, 0, 1)
+#'
+#' @importFrom truncnorm etruncnorm
 
 get_cumulants <- function(d_str, .mean, .sd, ul, uh, n) {
   # This is the NUMERIC VALUE of the derivative of the ll without the X term.
@@ -190,6 +193,8 @@ get_cumulants <- function(d_str, .mean, .sd, ul, uh, n) {
 #' # to -(3n/\sigma^4) * (\sigma(1 + usl * alphal - ush * alphah)). This sum is our cumulant, which we denote as f in the function.
 #'
 #' # We then take the derivative of f w.r.t var, since f is equal to the appropriate cumulant.
+#'
+#' @importFrom Deriv Deriv
 
 get_cumulants_deriv <- function(d_str, var, .mean, .sd, ul, uh, n) {
 
@@ -289,7 +294,8 @@ find_A <- function( .mean, .sd, ul, uh, n) {
 #' @param ul Unstandardized lower truncation limit.
 #' @param uh Unstandardized upper truncation limit.
 #'
-#' @importFrom stats pnorm qnorm
+#' @importFrom stats pnorm qnorm runif
+#'
 
 samp_trunc <- function(nsamp, mean, sd, ul, uh) {
   p_low <- pnorm(ul, mean, sd)
@@ -309,7 +315,8 @@ samp_trunc <- function(nsamp, mean, sd, ul, uh) {
 #' @param uh Upper truncation limit.
 #' @param n Number of observations.
 #' @param sim.reps Number of repetitions to estimate bias of the bias-corrected MLE.
-#'
+#' @param type "meanub", "stddevub" for bias of Cordiero estimator for mean or standard deviation respectively.
+#'             "meanb", "stddevb" for bias of MLE of mean and standard deviation.
 #' @importFrom pracma inv
 #' @importFrom stats coef
 #' @importFrom tmvtnorm mle.tmvnorm
@@ -327,7 +334,7 @@ calculate_bias <- function(.mean, .sd, ul, uh, n, sim.reps, type) {
   means_b <- c()
   stddevs_b <- c()
 
-  # vectors of Cordeira-corrected MLEs
+  # vectors of Cordeiro-corrected MLEs
   means_ub <- c()
   stddevs_ub <- c()
 
@@ -385,71 +392,49 @@ cordeiro_bias = function(.mean, .sd, .ul, .uh, .n) {
 
 #' Auxillary function to calculate the negative log posterior with Jeffrey's prior.
 #'
-#' @param .pars Vector of parameters specifying mu and sigma.
-#' @param par2is "sd" if the second entry in .pars is the standard deviation, and "var" otherwise.
+#' @param .pars Vector of parameters specifying mean and standard deviation.
 #' @param .x Data to use log likelihood calculation.
 #' @param .a Left truncation limit.
 #' @param .b Right truncation limit.
+#'
+#' @example
+#' mu <- 1
+#' sigma <- 1
+#' x <- 2
+#' a <- -5
+#' b <- 5
+#' nlpost_Jeffreys(pars=c(mu, sigma), x, a, b)
+#'
+#' @importFrom mvtnorm dmvnorm pmvnorm
 
-nlpost_Jeffreys = function(.pars, par2is = "sd", .x, .a, .b) {
-  assert("Left truncation is before right truncation" , .a < b )
-  # variance parameterization
-  if (par2is == "var") {
+nlpost_Jeffreys = function(.pars, .x, .a, .b) {
+  assert("Left truncation is before right truncation" , .a < .b )
+  .mu = .pars[1]
+  .sigma = .pars[2]
 
-    .mu = .pars[1]
-    .var = .pars[2]
+  if ( .sigma < 0 ) return(.Machine$integer.max)
 
-    if ( .var < 0 ) return(.Machine$integer.max)
-
-    # as in nll()
-    term1 = dmvnorm(x = as.matrix(.x, nrow = 1),
-                    mean = as.matrix(.mu, nrow = 1),
-                    # sigma here is covariance matrix
-                    sigma = as.matrix(.var, nrow=1),
-                    log = TRUE)
-
-
-    term2 = length(.x) * log( pmvnorm(lower = .a,
-                                      upper = .b,
-                                      mean = .mu,
-                                      # remember sigma here is covariance matrix, not the SD
-                                      sigma = .var ) )
-
-    term3 = log( sqrt( det( E_fisher(.mu = .mu, .sigma = sqrt(.var), .n = length(.x), .a = .a, .b = .b) ) ) )
-
-    nlp.value = -( sum(term1) - term2 + term3 )
-
-    if ( is.infinite(nlp.value) | is.na(nlp.value) ) return(.Machine$integer.max)
-  }
-
-  # SD parameterization
-  if (par2is == "sd") {
-
-    .mu = .pars[1]
-    .sigma = .pars[2]
-
-    if ( .sigma < 0 ) return(.Machine$integer.max)
-
-    # as in nll()
-    term1 = dmvnorm(x = as.matrix(.x, nrow = 1),
-                    mean = as.matrix(.mu, nrow = 1),
-                    # sigma here is covariance matrix,
-                    sigma = as.matrix(.sigma^2, nrow=1),
-                    log = TRUE)
+  # as in nll()
+  term1 = dmvnorm(x = as.matrix(.x, nrow = 1),
+                  mean = as.matrix(.mu, nrow = 1),
+                  # sigma here is covariance matrix,
+                  sigma = as.matrix(.sigma^2, nrow=1),
+                  log = TRUE)
 
 
-    term2 = length(.x) * log( pmvnorm(lower = .a,
-                                      upper = .b,
-                                      mean = .mu,
-                                      # remember sigma here is covariance matrix, not the SD
-                                      sigma = .sigma^2 ) )
+  term2 = length(.x) * log( pmvnorm(lower = .a,
+                                    upper = .b,
+                                    mean = .mu,
+                                    # remember sigma here is covariance matrix, not the SD
+                                    sigma = .sigma^2 ) )
 
-    term3 = log( sqrt( det( E_fisher(.mu = .mu, .sigma = .sigma, .n = length(.x), .a = .a, .b = .b) ) ) )
+  term3 = log( sqrt( det( E_fisher(.mean = .mu, .sd = .sigma, .n = length(.x), .a = .a, .b = .b) ) ) )
 
-    nlp.value = -( sum(term1) - term2 + term3 )
+  nlp.value = -( sum(term1) - term2 + term3 )
 
-    if ( is.infinite(nlp.value) | is.na(nlp.value) ) return(.Machine$integer.max)
-  }
+    if ( is.infinite(nlp.value) | is.na(nlp.value) ) {
+      return(.Machine$integer.max)
+    }
 
   nlp.value
 
@@ -462,7 +447,7 @@ nlpost_Jeffreys = function(.pars, par2is = "sd", .x, .a, .b) {
 #' @param sd.start Initial value for sigma.
 #' MM: Let's format ci.left and ci.right as a single numerical arg, ci.level (default 0.95), and assume they want symmetric
 #' @param ci.left Number between 0 and 1 . Left end of a confidence interval for each parameter estimate.
-#' @param ci.right Number between 01 and 1. Right end of a confidence interval for each parameter estimate. By default 1-ci.left.
+#' @param ci.right Number between 0 and 1. Right end of a confidence interval for each parameter estimate. By default 1-ci.left.
 #' @param ... Parameters to pass to sampling()
 #' @example
 #'
@@ -481,6 +466,9 @@ nlpost_Jeffreys = function(.pars, par2is = "sd", .x, .a, .b) {
 #'                        data = list( n = 3, LL = a, UU = b),
 #'                        iter = iter)
 #'
+#' @importFrom rstan stan_model sampling
+#' @importFrom stats median quantile
+#' @importFrom stats4 mle
 #' @references
 #' https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html
 
@@ -490,9 +478,7 @@ estimate_jeffreys_mcmc <- function(x,
                                   ci.left,
                                   ci.right,
                                   ...) {
-  assert("Feasible standard deviation starting point ", sigma.start > 0)
-  # LL and UU: cutpoints on RAW scale, not Z-scores
-  # sigma: SD, not variance
+  assert("Feasible standard deviation starting point ", sd.start > 0)
   model.text <- "
 functions{
     real jeffreys_prior(real mu, real sigma, real LL, real UU, int n){
@@ -590,9 +576,8 @@ withCallingHandlers({
 postSumm <- summary(post)$summary
 print(postSumm)
 
-nlpost_simple = function(.mean, .sd, par2is, x, a, b) {
+nlpost_simple = function(.mean, .sd, x, a, b) {
   nlpost.value = nlpost_Jeffreys(.pars = c(.mean, .sd),
-                                 par2is = par2is,
                                  .x = x, .a = a, .b = b)
   return(nlpost.value)
 }
@@ -616,20 +601,20 @@ Shat = c( postSumm["sigma", "mean"], median( rstan::extract(post, "sigma")[[1]] 
 MhatSE = postSumm["mu", "se_mean"]
 ShatSE = postSumm["sigma", "se_mean"]
 
-
+# convert the numeric ci.left and ci.right to strings of percentages.
+l.lim.str <- paste0(toString(ci.left * 100), "%")
+r.lim.str <- paste0(toString(ci.right * 100), "%")
 
 # CI limits
-S.CI = c( postSumm["sigma", ci.left], postSumm["sigma", ci.right] )
-M.CI = c( postSumm["mu", ci.left], postSumm["mu", ci.right] )
+S.CI = c( postSumm["sigma", l.lim.str], postSumm["sigma", r.lim.str] )
+M.CI = c( postSumm["mu", l.lim.str], postSumm["mu", r.lim.str] )
 # sanity check:
-l.lim <- as.numeric(substr(ci.left, 1, nchar(ci.left) - 1)) / 100
-r.lim <- as.numeric(substr(ci.right, 1, ncchar(ci.right) - 1)) / 100
 
-assert("Left endpoint is less than right endpoint", l.lim < r.lim)
 
-myMhatCI = as.numeric( c( quantile( rstan::extract(post, "mu")[[1]], l.lim ),
-                          quantile( rstan::extract(post, "mu")[[1]], r.lim ) ) )
-expect_equal(M.CI, myMhatCI)
+assert("Left endpoint is less than right endpoint", ci.right < ci.left)
+
+myMhatCI = as.numeric( c( quantile( rstan::extract(post, "mu")[[1]], ci.left ),
+                          quantile( rstan::extract(post, "mu")[[1]], ci.right ) ) )
 
 
 # the point estimates are length 2 (post means, then medians),
@@ -689,7 +674,7 @@ E_fisher = function(.mean, .sd, .n, .a, .b) {
 
 #' Returns the value of the Jeffreys prior.
 #'
-#' @param .pars Vector of parameters specifying mu and sigma.
+#' @param .pars Vector of parameters specifying mean and standard deviation.
 #' @param .x Data to use log likelihood calculation.
 #' @param .a Left truncation limit.
 #' @param .b Right truncation limit.
@@ -705,10 +690,17 @@ prior = function(.pars, .x, .a, .b) {
 
 #' Returns the value of the negative log-posterior with the Jeffrey's prior.
 #'
-#' @param .pars Vector of parameters specifying mu and sigma.
+#' @param .pars Vector specifying mu and sigma.
 #' @param .x Data to use log likelihood calculation.
 #' @param .a Left truncation limit.
 #' @param .b Right truncation limit.
+#'
+#' @example
+#' mu <- 1
+#' sigma <- 1
+#' neg_log_post(c(mu, sigma), 1, -5, 5)
+#'
+#' @importFrom truncnorm dtruncnorm
 
 neg_log_post = function(.pars, .x, .a, .b) {
   assert("Positive standard deviation: ", .pars[2] > 0)

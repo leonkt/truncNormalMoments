@@ -19,6 +19,9 @@ calculate_bias(.mean, .sd, ul, uh, n, sim.reps, type)
 \item{n}{Number of observations.}
 
 \item{sim.reps}{Number of repetitions to estimate bias of the bias-corrected MLE.}
+
+\item{type}{"meanub", "stddevub" for bias of Cordiero estimator for mean or standard deviation respectively.
+"meanb", "stddevb" for bias of MLE of mean and standard deviation.}
 }
 \description{
 Applies the bias correction, K^{-1}AK, of Godwin et al. and

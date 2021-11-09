@@ -7,7 +7,7 @@ Authors@R:
            role = c("aut", "cre"),
            email = "leontk@stanford.edu",
            comment = c())
-Imports: assert, stats, truncnorm, pracma, tmvtnorm
+Imports: assert, stats, truncnorm, pracma, tmvtnorm, rstan, stats4, Deriv, mvtnorm
 Description: This package finds the .
 License: GPL (>=3)
 Encoding: UTF-8

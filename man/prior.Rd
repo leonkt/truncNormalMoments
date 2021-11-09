@@ -7,7 +7,7 @@
 prior(.pars, .x, .a, .b)
 }
 \arguments{
-\item{.pars}{Vector of parameters specifying mu and sigma.}
+\item{.pars}{Vector of parameters specifying mean and standard deviation.}
 
 \item{.x}{Data to use log likelihood calculation.}
 
