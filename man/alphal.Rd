@@ -4,12 +4,12 @@
 \alias{alphal}
 \title{Return the conditional density of a normal random variable, given that its value is between ul and uh, evaluated at usl.}
 \usage{
-alphal(m, s, ul, uh)
+alphal(.mean, .sd, ul, uh)
 }
 \arguments{
-\item{m}{Mean of normal distribution.}
+\item{.mean}{Mean of normal distribution.}
 
-\item{s}{Standard deviation of normal distribution.}
+\item{.sd}{Standard deviation of normal distribution.}
 
 \item{ul}{Unstandardized lower truncation limit.}
 

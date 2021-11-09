@@ -2,7 +2,7 @@
 % Please edit documentation in R/functions.R
 \name{prior}
 \alias{prior}
-\title{Returns the value of the Jeffrey's prior.}
+\title{Returns the value of the Jeffreys prior.}
 \usage{
 prior(.pars, .x, .a, .b)
 }
@@ -16,5 +16,5 @@ prior(.pars, .x, .a, .b)
 \item{.b}{Right truncation limit.}
 }
 \description{
-Returns the value of the Jeffrey's prior.
+Returns the value of the Jeffreys prior.
 }

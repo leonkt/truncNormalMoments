@@ -5,12 +5,22 @@
 \title{Get derivatives w.r.t var of the cumulants.
 Evaluates derivatives of cumulants at specific value.}
 \usage{
-get_cumulants_deriv(d_str, var, m, s, ul, uh, n)
+get_cumulants_deriv(d_str, var, .mean, .sd, ul, uh, n)
 }
 \arguments{
 \item{d_str}{Cumulant to take the derivative of}
 
 \item{var}{Derivative of cumulant with respect to var}
+
+\item{.mean}{Mean of untruncated normal distribution}
+
+\item{.sd}{Standard deviation of untruncated normal distribution.}
+
+\item{ul}{Lower truncation limit}
+
+\item{uh}{Upper truncation limit}
+
+\item{n}{Number of observations}
 }
 \description{
 Get derivatives w.r.t var of the cumulants.

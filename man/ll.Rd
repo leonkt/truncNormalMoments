@@ -6,12 +6,12 @@
 We assume that the data are distributed according to a normal distribution of mean m, standard
 deviation s, truncated at lower and upper limits, ul and uh, respectively.}
 \usage{
-ll(m, s, ul, uh, n)
+ll(.mean, .sd, ul, uh, n)
 }
 \arguments{
-\item{m}{Mean of normal distribution.}
+\item{.mean}{Mean of normal distribution.}
 
-\item{s}{Standard deviation of normal distribution.}
+\item{.sd}{Standard deviation of normal distribution.}
 
 \item{ul}{Unstandardized lower truncation limit.}
 

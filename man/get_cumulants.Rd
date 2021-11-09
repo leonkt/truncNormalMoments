@@ -4,18 +4,20 @@
 \alias{get_cumulants}
 \title{Finds cumulants of the full log-likelihood.}
 \usage{
-get_cumulants(d_str, m, s, ul, uh, n)
+get_cumulants(d_str, .mean, .sd, ul, uh, n)
 }
 \arguments{
 \item{d_str}{Type of derivative to take. Consists of characters "m" and "s"}
 
-\item{m}{Mean of underlying normal distribution.}
+\item{.mean}{Mean of underlying normal distribution.}
 
-\item{s}{Standard deviation of underlying normal distributin.}
+\item{.sd}{Standard deviation of underlying normal distributin.}
 
 \item{ul}{Unstandardized lower truncation limit.}
 
 \item{uh}{Unstandardized upper truncation limit.}
+
+\item{n}{Number of observations.}
 }
 \description{
 Finds cumulants of the full log-likelihood.

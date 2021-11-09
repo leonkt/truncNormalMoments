@@ -4,12 +4,14 @@
 \alias{ush}
 \title{Returns the standardized upper truncation limit for a normal distribution.}
 \usage{
-ush(m, s, ul, uh)
+ush(.mean, .sd, ul, uh)
 }
 \arguments{
-\item{m}{Mean of normal distribution.}
+\item{.mean}{Mean of normal distribution.}
 
-\item{s}{Standard deviation of normal distribution.}
+\item{.sd}{Standard deviation of normal distribution.}
+
+\item{ul}{Unstandardized lower truncation limit.}
 
 \item{uh}{Unstandardized upper truncation limit.}
 }

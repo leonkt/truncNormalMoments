@@ -2,11 +2,11 @@ library(testthat)
 library(rstan)
 
 ######## DEFINING VARIABLES #########
-n <- 3
+n <- 20
 m <- 1.2
 s <- 8
-ul <- 1.2
-uh <- 2
+ul <- 0
+uh <- 3
 x <- 2
 model.text <- "
 functions{
@@ -73,18 +73,25 @@ generated quantities{
   log_post = log_lik + log_prior;
 }
 "
-l.lim <- 0.05
-r.lim <- 0.95
+l.lim <- 0.025
+r.lim <- 0.975
 
 stan.model <- stan_model(model_code = model.text,
                          isystem = "~/Desktop")
-post <- sampling(stan.model, data = list( n = n, LL = ul, UU = uh, y = c(1.2, 2.2, 3.2)), iter=10)
+post <- sampling(stan.model, data = list( n = n, LL = ul, UU = uh, y =c(0.385258397941442, 1.68066267127739, 0.729227742032434, 0.479120432291688,
+                                                   0.897279068695914, 0.0575356881970433, 0.165652783807015, 0.875647820475464,
+                                                   0.380168104717168, 0.825551957468494, 0.589842597791253, 0.402854395794205,
+                                                   1.7668857263465, 0.649703054651576, 0.83074621395, 0.407612065235468,
+                                                   1.49884534475478, 0.420770708293162, 0.699931456061883, 1.06188921169992)),  iter=100)
+print(post)
+print(summary(post))
 postSumm <- summary(post)$summary
-myMhatCI = as.numeric( c( quantile( rstan::extract(post, "mu")[[1]], l.lim ),
+
+myMhatCI <- as.numeric( c( quantile( rstan::extract(post, "mu")[[1]], l.lim ),
                           quantile( rstan::extract(post, "mu")[[1]], r.lim ) ) )
-M.CI = c( postSumm["mu", "5%"], postSumm["mu", "95%"] )
-Mhat = c( postSumm["mu", "mean"], median( rstan::extract(post, "mu")[[1]] ) )
-MhatSE = postSumm["mu", "se_mean"]
+M.CI <- c( postSumm["mu", "2.5%"], postSumm["mu", "97.5%"] )
+Mhat <- c( postSumm["mu", "mean"], median( rstan::extract(post, "mu")[[1]] ) )
+MhatSE <- postSumm["mu", "se_mean"]
 
 ######## AUXILLIARY FUNCTIONS #########
 

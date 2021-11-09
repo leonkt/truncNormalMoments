@@ -5,14 +5,14 @@
 \title{Takes samples from a normal distribution of mean m and standard deviation s.
 Rejects samples greater than uh or less than ul.}
 \usage{
-samp_trunc(nsamp, mu, sigma, ul, uh)
+samp_trunc(nsamp, mean, sd, ul, uh)
 }
 \arguments{
 \item{nsamp}{Number of observations to draw from normal distribution.}
 
-\item{mu}{Mean of normal distribution}
+\item{mean}{Mean of normal distribution}
 
-\item{sigma}{Standard deviation of normal distribution.}
+\item{sd}{Standard deviation of normal distribution.}
 
 \item{ul}{Unstandardized lower truncation limit.}
 

@@ -7,7 +7,7 @@
 get_deriv(d_str)
 }
 \arguments{
-\item{dstr}{Type of derivative to take. Consists of characters "m" and "s"}
+\item{d_str}{Type of derivative to take. Consists of characters "m" and "s"}
 }
 \description{
 Finds the derivative of the factor of log-likelihood independent of data.

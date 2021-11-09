@@ -4,12 +4,12 @@
 \alias{find_K}
 \title{Finds the Fisher Information matrix on n observations from a truncated normal distribution.}
 \usage{
-find_K(m, s, ul, uh, n)
+find_K(.mean, .sd, ul, uh, n)
 }
 \arguments{
-\item{m}{Mean of underlying normal distribution.}
+\item{.mean}{Mean of underlying normal distribution.}
 
-\item{s}{Standard deviation of underlying normal distribution.}
+\item{.sd}{Standard deviation of underlying normal distribution.}
 
 \item{ul}{Lower truncation limit.}
 

@@ -7,9 +7,9 @@ Authors@R:
            role = c("aut", "cre"),
            email = "leontk@stanford.edu",
            comment = c())
+Imports: assert, stats, truncnorm, pracma, tmvtnorm
 Description: This package finds the .
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+License: GPL (>=3)
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

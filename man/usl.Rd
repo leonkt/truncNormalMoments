@@ -4,14 +4,16 @@
 \alias{usl}
 \title{Returns the standardized lower truncation limit for a normal distribution.}
 \usage{
-usl(m, s, ul, uh)
+usl(.mean, .sd, ul, uh)
 }
 \arguments{
-\item{m}{Mean of normal distribution.}
+\item{.mean}{Mean of normal distribution.}
 
-\item{s}{Standard deviation of normal distribution.}
+\item{.sd}{Standard deviation of normal distribution.}
 
 \item{ul}{Unstandardized lower truncation limit.}
+
+\item{uh}{Unstandardized upper truncation limit.}
 }
 \description{
 Returns the standardized lower truncation limit for a normal distribution.

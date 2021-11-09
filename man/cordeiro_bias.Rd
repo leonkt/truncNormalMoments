@@ -5,18 +5,18 @@
 \title{Calculates the Cordiero bias-correction for the MLE of the mean and standard deviation of a
 doubly-truncated normal.}
 \usage{
-cordeiro_bias(.m, .s, .ul, .uh, .n)
+cordeiro_bias(.mean, .sd, .ul, .uh, .n)
 }
 \arguments{
-\item{m}{Mean of underlying normal distribution.}
+\item{.mean}{Mean of underlying normal distribution.}
 
-\item{s}{Standard deviation of underlying normal distribution.}
+\item{.sd}{Standard deviation of underlying normal distribution.}
 
-\item{ul}{Lower truncation limit.}
+\item{.ul}{Lower truncation limit.}
 
-\item{uh}{Upper truncation limit.}
+\item{.uh}{Upper truncation limit.}
 
-\item{n}{Number of observations.}
+\item{.n}{Number of observations.}
 }
 \description{
 Calculates the Cordiero bias-correction for the MLE of the mean and standard deviation of a

@@ -5,12 +5,12 @@
 \title{Applies the bias correction, K^{-1}AK, of Godwin et al. and
 calculates bias of the bias-corrected MLE.}
 \usage{
-calculate_bias(m, s, ul, uh, n, sim.reps)
+calculate_bias(.mean, .sd, ul, uh, n, sim.reps, type)
 }
 \arguments{
-\item{m}{Mean of underlying normal distribution.}
+\item{.mean}{Mean of underlying normal distribution.}
 
-\item{s}{Standard deviation of underlying normal distribution.}
+\item{.sd}{Standard deviation of underlying normal distribution.}
 
 \item{ul}{Lower truncation limit.}
 

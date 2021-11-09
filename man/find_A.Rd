@@ -4,12 +4,12 @@
 \alias{find_A}
 \title{Finds the A matrix from Godwin et al.}
 \usage{
-find_A(m, s, ul, uh, n)
+find_A(.mean, .sd, ul, uh, n)
 }
 \arguments{
-\item{m}{Mean of underlying normal distribution.}
+\item{.mean}{Mean of underlying normal distribution.}
 
-\item{s}{Standard deviation of underlying normal distribution.}
+\item{.sd}{Standard deviation of underlying normal distribution.}
 
 \item{ul}{Lower truncation limit.}
 

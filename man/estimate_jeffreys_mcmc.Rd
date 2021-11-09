@@ -4,39 +4,24 @@
 \alias{estimate_jeffreys_mcmc}
 \title{Finds the MAP estimates for mu and sigma of the full normal distribution, given data from a truncated normal.}
 \usage{
-estimate_jeffreys_mcmc(x, mu.start, sigma.start, ci.left, ci.right, ...)
+estimate_jeffreys_mcmc(x, mean.start, sd.start, ci.left, ci.right, ...)
 }
 \arguments{
-\item{x}{Data from truncated normal}
+\item{x}{Vector of observations from truncated normal}
 
-\item{mu.start}{Initial value for mu.}
+\item{mean.start}{Initial value for mu.}
 
-\item{sigma.start}{Initial value for sigma.}
+\item{sd.start}{Initial value for sigma.
+MM: Let's format ci.left and ci.right as a single numerical arg, ci.level (default 0.95), and assume they want symmetric}
 
-\item{ci.left}{String formatted as "X\%". Left end of a confidence interval for each parameter estimate.}
+\item{ci.left}{Number between 0 and 1 . Left end of a confidence interval for each parameter estimate.}
 
-\item{ci.right}{String formatted as "X\%". Right end of a confidence interval for each parameter estimate.}
+\item{ci.right}{Number between 01 and 1. Right end of a confidence interval for each parameter estimate. By default 1-ci.left.}
 
-\item{p}{Vector of parameters containing truncation points and number of observations.}
+\item{...}{Parameters to pass to sampling()}
 }
 \description{
 Finds the MAP estimates for mu and sigma of the full normal distribution, given data from a truncated normal.
-}
-\examples{
-
-n <- 3
-a <- 1
-b <- 2
-iter <- 5000
-max_treedepth <- 10
-
-# Notice that everything following ci.right is there as part of the ellipsis.
-# These are optional, and will be passed directly into sampling(). See references
-# for additional information regarding sampling().
-estimate_jeffreys_mcmc(x=c(1.2,2.2,3.2), mu.start, sigma.start, "5\%", ci.right="95\%",
-                       data = list( n = n, LL = a, UU = b),
-                       iter = 10)
-
 }
 \references{
 https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html
