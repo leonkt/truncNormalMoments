@@ -112,7 +112,7 @@ post <- sampling(stan.model, data = list( n = length(x), a = ul, b = uh, y = x, 
 
 #  print(post)
 # print(summary(post))
-# postSumm <- summary(post)$summary
+postSumm <- summary(post)$summary
 #
 # myMhatCI <- as.numeric( c( quantile( rstan::extract(post, "mu")[[1]], l.lim ),
 #                           quantile( rstan::extract(post, "mu")[[1]], r.lim ) ) )
