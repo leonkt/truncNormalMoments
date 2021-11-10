@@ -92,28 +92,26 @@ l.lim <- 0.025
 r.lim <- 0.975
 
 
+
+
+# stan's own example
+# same isystem situation as above
+stancode <- 'data {real y_mean;} parameters {real y;} model {y ~ normal(y_mean,1);}'
+mod <- stan_model(model_code = stancode, verbose = TRUE)
+fit <- sampling(mod, data = list(y_mean = 0))
+fit2 <- sampling(mod, data = list(y_mean = 5))
+summary(fit)$summary
+
+
+
 # need to have isystem arg to avoid "syntax error"
 # but either way, it says parsing has been successful
-#stan.model <- stan_model(model_code = model.text, isystem = "~/Desktop", verbose = TRUE)
-stan.model <- stan_model(model_code = model.text, verbose = TRUE)
-
-# # stan's own example
-# # same isystem situation as above
-# stancode <- 'data {real y_mean;} parameters {real y;} model {y ~ normal(y_mean,1);}'
-# mod <- stan_model(model_code = stancode, verbose = TRUE)
-# fit <- sampling(mod, data = list(y_mean = 0))
-# fit2 <- sampling(mod, data = list(y_mean = 5))
-
-
-
-# stan.model <- stan_model(model_code = model.text,
-#                          isystem = "~/Desktop")
-post <- sampling(stan.model, data = list( n = length(x), a = ul, b = uh, y = x, iters=100))
-
-#  print(post)
-# print(summary(post))
-postSumm <- summary(post)$summary
+#stan.model <- stan_model(model_code = model.text, verbose = TRUE)
+# post <- sampling(stan.model, data = list( n = length(x), a = ul, b = uh, y = x, iters=100))
 #
+# # THIS IS THE LINE THAT FAILS TEST():
+# postSumm <- summary(post)$summary
+
 # myMhatCI <- as.numeric( c( quantile( rstan::extract(post, "mu")[[1]], l.lim ),
 #                           quantile( rstan::extract(post, "mu")[[1]], r.lim ) ) )
 # M.CI <- c( postSumm["mu", "2.5%"], postSumm["mu", "97.5%"] )
