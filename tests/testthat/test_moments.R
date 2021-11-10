@@ -1,14 +1,14 @@
-library(testthat)
-library(rstan)
-
-
-# stan's own example
-# same isystem situation as above
-stancode <- 'data {real y_mean;} parameters {real y;} model {y ~ normal(y_mean,1);}'
-mod <- stan_model(model_code = stancode, verbose = TRUE)
-fit <- sampling(mod, data = list(y_mean = 0))
-# I added this line, and it's the culprit
-summary(fit)$summary
+# library(testthat)
+# library(rstan)
+#
+#
+# # stan's own example
+# # same isystem situation as above
+# stancode <- 'data {real y_mean;} parameters {real y;} model {y ~ normal(y_mean,1);}'
+# mod <- stan_model(model_code = stancode, verbose = TRUE)
+# fit <- sampling(mod, data = list(y_mean = 0))
+# # I added this line, and it's the culprit
+# summary(fit)$summary
 
 
 

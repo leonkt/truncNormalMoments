@@ -9,35 +9,6 @@ library(testit)
 .d_key <- c(m= ".mean", s=".sd" )
 
 
-#' Returns the standardized lower truncation limit for a normal distribution.
-#'
-#' @param .mean Mean of normal distribution.
-#' @param .sd Standard deviation of normal distribution.
-#' @param .a Unstandardized lower truncation limit.
-#' @param .b Unstandardized upper truncation limit.
-#' @example
-#' # Returns the z-score of the value 1, for a normal distribution of mean 0, standard deviation 2.
-#' Za(0, 2, 1)
-#'
-
-Za <- function(.mean,.sd,.a,.b) {
-  (.a-.mean)/.sd
-}
-
-#' Returns the standardized upper truncation limit for a normal distribution.
-#'
-#' @param .mean Mean of normal distribution.
-#' @param .sd Standard deviation of normal distribution.
-#' @param .b Unstandardized upper truncation limit.
-#' @param .a Unstandardized lower truncation limit.
-#' @example
-#' # Returns the z-score of the value 1, for a normal distribution of mean 0, standard deviation 2.
-#' Zb(0, 2, 1)
-
-Zb <- function(.mean, .sd,.a,.b) {
-  (.b-.mean)/.sd
-}
-
 #' Return the conditional density of a normal random variable, given that its value is between .a and .b, evaluated at Za.
 #'
 #' @param .mean Mean of normal distribution.
@@ -46,9 +17,14 @@ Zb <- function(.mean, .sd,.a,.b) {
 #' @param .b Unstandardized upper truncation limit.
 #' @importFrom stats dnorm pnorm
 
-
 alpha_a <- function(.mean, .sd, .a, .b) {
-  dnorm(Za(.mean,.sd,.a,.b)) / (pnorm(Zb(.mean,.sd,.a,.b)) - pnorm(Za(.mean,.sd,.a,.b)))
+
+  Z_score <- function(mean, sd, x){ (x-mean)/sd }
+
+  Za = Z_score(.mean, .sd, .a)
+  Zb = Z_score(.mean, .sd, .b)
+
+  dnorm(Za) / (pnorm(Zb) - pnorm(Za))
 }
 
 #' Return the conditional density of a normal random variable, given that its value is between .a and .b, evaluated at Zb.
@@ -61,7 +37,13 @@ alpha_a <- function(.mean, .sd, .a, .b) {
 
 
 alpha_b <- function(.mean, .sd, .a, .b) {
-  dnorm(Zb(.mean,.sd,.a,.b)) / (pnorm(Zb(.mean,.sd,.a,.b)) - pnorm(Za(.mean,.sd,.a,.b)))
+
+  Z_score <- function(mean, sd, x){ (x-mean)/sd }
+
+  Za = Z_score(.mean, .sd, .a)
+  Zb = Z_score(.mean, .sd, .b)
+
+  dnorm(Za) / (pnorm(Zb) - pnorm(Za))
 }
 
 
