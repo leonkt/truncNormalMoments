@@ -96,7 +96,7 @@ nlpost_jeffreys = function(mean, sd, .x, .a, .b) {
 
 }
 
-#' Finds the MAP estimates for mu and sigma of the full normal distribution, given data from a truncated normal.
+#' Estimates the posterior modes for the parameters of the underlying normal distribution, given truncated data
 #'
 #' @param x Vector of observations from truncated normal
 #' @param mean.start Initial value for mu.
@@ -136,7 +136,7 @@ estimate_jeffreys_mcmc <- function(x,
                                   a,
                                   b,
                                   ...) {
-  assert("Feasible standard deviation starting point ", sd.start > 0)
+  assert("sd.start must be positive", sd.start > 0)
   model.text <- "
 functions{
 	real jeffreys_prior(real mu, real sigma, real a, real b, int n){
@@ -239,11 +239,7 @@ nlpost_simple = function(.mean, .sd, x, a, b) {
   return(nlpost.value)
 }
 
-#bm
 
-# as confirmed in "2021-8-19 Investigate profile penalized LRT inference",
-#  the "MLEs" from this match those from optim() above
-# https://stat.ethz.ch/R-manual/R-patched/library/stats4/html/mle.html
 res <- mle( minuslogl = nlpost_simple,
            start = list( .mu=mean.start, .sigma=sd.start) )
 
@@ -277,9 +273,11 @@ return( list( post = post,
               mean.est = Mhat,
               sd.est = Shat,
 
+              #MM: Sync terminology throughout (including above as well). These should be "mean.se", "sd.se", etc.
               MhatSE = rep(MhatSE, 2),
               ShatSE = rep(ShatSE, 2),
 
+              #MM: Similarly, should be "mean.ci", "sd.ci", etc.
               M.CI = M.CI,
               S.CI = S.CI,
 
@@ -308,6 +306,7 @@ E_fisher = function(.mean, .sd, .n, .a, .b) {
   Za = (.a - .mean) / .sd
   Zb = (.b - .mean) / .sd
 
+  #MM: use the helper fn defined above for these?
   alpha.a = dnorm(Za) / ( pnorm(Zb) - pnorm(Za) )
   alpha.b = dnorm(Zb) / ( pnorm(Zb) - pnorm(Za) )
 
@@ -335,6 +334,7 @@ E_fisher = function(.mean, .sd, .n, .a, .b) {
 
 prior = function(.pars, .x, .a, .b) {
   assert("Left truncation before right truncation: ", .a < .b)
+  #MM: Separate pars into mean, sd as illustrated above
   .mu = .pars[1]
   .sigma = .pars[2]
 
@@ -356,6 +356,7 @@ prior = function(.pars, .x, .a, .b) {
 #'
 #' @importFrom truncnorm dtruncnorm
 
+#MM: Is this fn redundant with nlpost_jeffreys?
 neg_log_post = function(.pars, .x, .a, .b) {
   assert("Positive standard deviation: ", .pars[2] > 0)
   assert("Left truncation before right truncation: ", .a < .b)
