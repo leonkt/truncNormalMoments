@@ -48,27 +48,25 @@ alpha_b <- function(.mean, .sd, .a, .b) {
 
 
 
-#' Auxillary function to calculate the negative log posterior with Jeffreys prior.
+#' Calculate the negative log posterior under the Jeffreys prior
 #'
-#' @param .pars Vector of parameters specifying mean and standard deviation.
+#' @param mean Mean of normal distribution.
+#' @param sd Standard deviation of normal distribution.
 #' @param .x Data to use log likelihood calculation.
 #' @param .a Left truncation limit.
 #' @param .b Right truncation limit.
 #'
 #' @example
-#' mu <- 1
-#' sigma <- 1
-#' x <- 2
-#' a <- -5
-#' b <- 5
-#' nlpost_Jeffreys(pars=c(mu, sigma), x, a, b)
+#' nlpost_jeffreys(mean = 1, sd = 1, .x = 2, .a = -5, .b = 5)
 #'
 #' @importFrom mvtnorm dmvnorm pmvnorm
 
-nlpost_Jeffreys = function(.pars, .x, .a, .b) {
-  assert("Left truncation is before right truncation" , .a < .b )
-  .mu = .pars[1]
-  .sigma = .pars[2]
+nlpost_jeffreys = function(mean, sd, .x, .a, .b) {
+  assert("Right truncation point must be larger than left truncation point" , .a < .b )
+
+  #MM: Leon, please change .mu and .sigma below to mean and sd instead of this hack I introduced
+  .mu = mean
+  .sigma = sd
 
   if ( .sigma < 0 ) return(.Machine$integer.max)
 
@@ -236,7 +234,7 @@ withCallingHandlers({
 postSumm <- summary(post)$summary
 
 nlpost_simple = function(.mean, .sd, x, a, b) {
-  nlpost.value = nlpost_Jeffreys(.pars = c(.mean, .sd),
+  nlpost.value = nlpost_jeffreys(.pars = c(.mean, .sd),
                                  .x = x, .a = a, .b = b)
   return(nlpost.value)
 }

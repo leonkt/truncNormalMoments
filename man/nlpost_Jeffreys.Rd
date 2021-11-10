@@ -2,12 +2,14 @@
 % Please edit documentation in R/functions.R
 \name{nlpost_Jeffreys}
 \alias{nlpost_Jeffreys}
-\title{Auxillary function to calculate the negative log posterior with Jeffreys prior.}
+\title{Calculate the negative log posterior under the Jeffreys prior}
 \usage{
-nlpost_Jeffreys(.pars, .x, .a, .b)
+nlpost_Jeffreys(mean, sd, .x, .a, .b)
 }
 \arguments{
-\item{.pars}{Vector of parameters specifying mean and standard deviation.}
+\item{mean}{Mean of normal distribution.}
+
+\item{sd}{Standard deviation of normal distribution.}
 
 \item{.x}{Data to use log likelihood calculation.}
 
@@ -16,5 +18,5 @@ nlpost_Jeffreys(.pars, .x, .a, .b)
 \item{.b}{Right truncation limit.}
 }
 \description{
-Auxillary function to calculate the negative log posterior with Jeffreys prior.
+Calculate the negative log posterior under the Jeffreys prior
 }
