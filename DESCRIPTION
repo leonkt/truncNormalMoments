@@ -19,7 +19,7 @@ Authors@R:
            comment = c())
 	)
 Imports: assert, stats, truncnorm, pracma, tmvtnorm, rstan, stats4, Deriv, mvtnorm
-Description: This package finds the moments and cumulants for a truncated normal. It also finds the MAP parameter estimates for the mean and standard deviation for a Normal, given data from the truncated distribution.
+Description: This package finds the MAP parameter estimates for the mean and standard deviation for a Normal, given data from the truncated distribution.
 License: GPL (>=3)
 Encoding: UTF-8
 LazyData: true
