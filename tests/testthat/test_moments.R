@@ -108,7 +108,7 @@ stan.model <- stan_model(model_code = model.text, verbose = TRUE)
 
 # stan.model <- stan_model(model_code = model.text,
 #                          isystem = "~/Desktop")
-# post <- sampling(stan.model, data = list( n = length(x), a = ul, b = uh, y = x, iters=100))
+post <- sampling(stan.model, data = list( n = length(x), a = ul, b = uh, y = x, iters=100))
 
 #  print(post)
 # print(summary(post))
