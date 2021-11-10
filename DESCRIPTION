@@ -1,14 +1,25 @@
 Package: truncNormalMoments
-Title: What the Package Does (One Line, Title Case)
+Title: Estimates mean and standard deviation for a Normal distribution, given data from a truncated Normal distribution
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "Leon",
+    c(person(given = "Leon",
            family = "Tran",
            role = c("aut", "cre"),
            email = "leontk@stanford.edu",
+           comment = c()),
+	person(given = "Maya",
+           family = "Mathur",
+           role = c("ctb"),
+           email = "mmathur@stanford.edu",
+           comment = c()),
+	person(given = "Blakeley",
+           family = "McShane",
+           role = c("ctb"),
+           email = "b-mcshane@kellogg.northwestern.edu",
            comment = c())
+	)
 Imports: assert, stats, truncnorm, pracma, tmvtnorm, rstan, stats4, Deriv, mvtnorm
-Description: This package finds the .
+Description: This package finds the moments and cumulants for a truncated normal. It also finds the MAP parameter estimates for the mean and standard deviation for a Normal, given data from the truncated distribution.
 License: GPL (>=3)
 Encoding: UTF-8
 LazyData: true

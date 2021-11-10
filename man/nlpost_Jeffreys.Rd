@@ -2,7 +2,7 @@
 % Please edit documentation in R/functions.R
 \name{nlpost_Jeffreys}
 \alias{nlpost_Jeffreys}
-\title{Auxillary function to calculate the negative log posterior with Jeffrey's prior.}
+\title{Auxillary function to calculate the negative log posterior with Jeffreys prior.}
 \usage{
 nlpost_Jeffreys(.pars, .x, .a, .b)
 }
@@ -16,5 +16,5 @@ nlpost_Jeffreys(.pars, .x, .a, .b)
 \item{.b}{Right truncation limit.}
 }
 \description{
-Auxillary function to calculate the negative log posterior with Jeffrey's prior.
+Auxillary function to calculate the negative log posterior with Jeffreys prior.
 }

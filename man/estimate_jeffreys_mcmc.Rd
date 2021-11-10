@@ -4,19 +4,28 @@
 \alias{estimate_jeffreys_mcmc}
 \title{Finds the MAP estimates for mu and sigma of the full normal distribution, given data from a truncated normal.}
 \usage{
-estimate_jeffreys_mcmc(x, mean.start = 0, sd.start = 1, ci.left, ci.right, ...)
+estimate_jeffreys_mcmc(
+  x,
+  mean.start = 0,
+  sd.start = 1,
+  ci.level = 0.95,
+  a,
+  b,
+  ...
+)
 }
 \arguments{
 \item{x}{Vector of observations from truncated normal}
 
 \item{mean.start}{Initial value for mu.}
 
-\item{sd.start}{Initial value for sigma.
-MM: Let's format ci.left and ci.right as a single numerical arg, ci.level (default 0.95), and assume they want symmetric}
+\item{sd.start}{Initial value for sigma.}
 
-\item{ci.left}{Number between 0 and 1 . Left end of a confidence interval for each parameter estimate.}
+\item{ci.level}{Number between 0.5 and 1. Gives a 100(ci.level)\% confidence interval.}
 
-\item{ci.right}{Number between 0 and 1. Right end of a confidence interval for each parameter estimate. By default 1-ci.left.}
+\item{a}{Left truncation limit.}
+
+\item{b}{Right truncation limit.}
 
 \item{...}{Parameters to pass to sampling()}
 }
