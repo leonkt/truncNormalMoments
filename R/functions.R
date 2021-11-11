@@ -88,9 +88,9 @@ nlpost_jeffreys = function(mean, sd, .x, .a, .b) {
 
   nlp.value = -( sum(term1) - term2 + term3 )
 
-    if ( is.infinite(nlp.value) | is.na(nlp.value) ) {
-      return(.Machine$integer.max)
-    }
+  if ( is.infinite(nlp.value) | is.na(nlp.value) ) {
+    return(.Machine$integer.max)
+  }
 
   nlp.value
 
@@ -119,23 +119,24 @@ nlpost_jeffreys = function(mean, sd, .x, .a, .b) {
 #' # Notice that everything following b is there as part of the ellipsis.
 #' # These are optional, and will be passed directly into sampling(). See references
 #' # for additional information regarding sampling().
-#' estimate_jeffreys_mcmc(c(1.2,2.2,3.2), mean.start, sd.start, ci.level=0.05, a, b,
+#' trunc_est(c(1.2,2.2,3.2), mean.start, sd.start, ci.level=0.05, a, b,
 #'                        iter = iter)
 #'
-#' @importFrom rstan stan_model sampling
+#' @import rstan
 #' @importFrom stats median quantile coef
 #' @importFrom stats4 mle
 #'
 #' @references
 #' https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html
 
-estimate_jeffreys_mcmc <- function(x,
-                                  mean.start = 0,
-                                  sd.start = 1,
-                                  ci.level = 0.95,
-                                  a,
-                                  b,
-                                  ...) {
+#MM: I retitled this fn
+trunc_est <- function(x,
+                      mean.start = 0,
+                      sd.start = 1,
+                      ci.level = 0.95,
+                      a,
+                      b,
+                      ...) {
   assert("sd.start must be positive", sd.start > 0)
   model.text <- "
 functions{
@@ -241,7 +242,7 @@ nlpost_simple = function(.mean, .sd, x, a, b) {
 
 
 res <- mle( minuslogl = nlpost_simple,
-           start = list( .mu=mean.start, .sigma=sd.start) )
+            start = list( .mu=mean.start, .sigma=sd.start) )
 
 
 maps <- as.numeric(coef(res))
@@ -314,11 +315,11 @@ E_fisher = function(.mean, .sd, .n, .a, .b) {
 
   k12 = -( 2*.n*(alpha.a - alpha.b) / .sd^2 ) +
     (.n/.sd^2)*( alpha.a - alpha.b + alpha.b*Zb^2 - alpha.a*Za^2 +
-                      (alpha.a - alpha.b)*(alpha.a*Za - alpha.b*Zb) )
+                   (alpha.a - alpha.b)*(alpha.a*Za - alpha.b*Zb) )
 
   k22 = (.n/.sd^2) - (3*.n*(1 + alpha.a*Za - alpha.b*Zb) / .sd^2) +
     (.n/.sd^2)*( Zb*alpha.b*(Zb^2 - 2) - Za*alpha.a*(Za^2 - 2) +
-                      (alpha.b*Zb - alpha.a*Za)^2 )
+                   (alpha.b*Zb - alpha.a*Za)^2 )
 
   return( matrix( c(-k11, -k12, -k12, -k22),
                   nrow = 2,

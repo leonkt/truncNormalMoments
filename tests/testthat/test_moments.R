@@ -1,21 +1,16 @@
-# library(testthat)
-# library(rstan)
 
 
-# # stan's own example
-# # same isystem situation as above
-# stancode <- 'data {real y_mean;} parameters {real y;} model {y ~ normal(y_mean,1);}'
-# mod <- stan_model(model_code = stancode, verbose = TRUE)
-# fit <- sampling(mod, data = list(y_mean = 0))
-# # I added this line, and it's the culprit
-# summary(fit)$summary
+# test issue:
+# - cannot use library(rstan) here
+# - NAMESPACE needs to use import(rstan), not just importFrom(rstan, ...)
+
+# https://stackoverflow.com/questions/69919465/r-package-development-tests-pass-in-console-but-fail-via-devtoolstest#69922844
 
 
-
-# library(testthat)
-# library(rstan)
-#
 ######## DEFINING VARIABLES #########
+
+# compare fitting model manually vs. with estimate_jeffreys_mcmc
+
 n <- 20
 m <- 1.2
 s <- 8
@@ -96,58 +91,51 @@ l.lim <- 0.025
 r.lim <- 0.975
 
 
-
-
-# # stan's own example
-# # same isystem situation as above
-# stancode <- 'data {real y_mean;} parameters {real y;} model {y ~ normal(y_mean,1);}'
-# mod <- stan_model(model_code = stancode, verbose = TRUE)
-# fit <- sampling(mod, data = list(y_mean = 0))
-# fit2 <- sampling(mod, data = list(y_mean = 5))
-# summary(fit)$summary  # FAILS
-
-
-
 # need to have isystem arg to avoid "syntax error"
 # but either way, it says parsing has been successful
 stan.model <- stan_model(model_code = model.text, verbose = TRUE)
 post <- sampling(stan.model, data = list( n = length(x), a = ul, b = uh, y = x, iters=100))
 
-# THIS IS THE LINE THAT FAILS TEST():
-postSumm <- summary(post)$summary
 
-# myMhatCI <- as.numeric( c( quantile( rstan::extract(post, "mu")[[1]], l.lim ),
-#                           quantile( rstan::extract(post, "mu")[[1]], r.lim ) ) )
-# M.CI <- c( postSumm["mu", "2.5%"], postSumm["mu", "97.5%"] )
-# # Mhat <- c( postSumm["mu", "mean"], median( rstan::extract(post, "mu")[[1]] ) )
-# MhatSE <- postSumm["mu", "se_mean"]
-#
-# ######## AUXILLIARY FUNCTIONS #########
-#
-# # Auxilliary function. Defined within function, so testthat cannot call the function.
-# # Calculates E(x-mu)
-# Ex_min_m <- function( m, s, ul, uh) {
-#   (s * (alphal( m, s, ul, uh) - alphah( m, s, ul, uh)) )
-# }
-#
-# # Auxilliary function. Defined within function, so testthat cannot call the function.
-# # Calculates E(x-mu)^2
-# Ex_min_m_sq <- function(m, s, ul, uh) {
-#   (s**2 * (1 + usl(m, s, ul, uh) * alphal(m, s, ul, uh) - ush(m, s, ul, uh) * alphah(m, s, ul, uh)) )
-# }
-#
-# ######## TESTS #########
-#
-#
-# test_that("Confidence Interval for Mhat matches", {
-#   expect_equal(M.CI, myMhatCI)
-# })
-#
+postSumm <- summary(post)$summary
+M.CI <- c( postSumm["mu", "2.5%"], postSumm["mu", "97.5%"] )
+# Mhat <- c( postSumm["mu", "mean"], median( rstan::extract(post, "mu")[[1]] ) )
+MhatSE <- postSumm["mu", "se_mean"]
+
+# now with estimate_jeffreys_mcmc
+#MM: this is what needs to be tested: compare the manual fit to the package
+# remember also to test the other arguments, like ci.level, as we discussed earlier
+res = estimate_jeffreys_mcmc(
+  x = x,
+  a = a,
+  b = b )
+
+
+######## AUXILIARY FUNCTIONS #########
+
+# Auxiliary function. Defined within function, so testthat cannot call the function.
+# Calculates E(x-mu)
+Ex_min_m <- function( m, s, ul, uh) {
+  (s * (alphal( m, s, ul, uh) - alphah( m, s, ul, uh)) )
+}
+
+# Auxiliary function. Defined within function, so testthat cannot call the function.
+# Calculates E(x-mu)^2
+Ex_min_m_sq <- function(m, s, ul, uh) {
+  (s**2 * (1 + usl(m, s, ul, uh) * alphal(m, s, ul, uh) - ush(m, s, ul, uh) * alphah(m, s, ul, uh)) )
+}
+
+######## TESTS #########
+
+test_that("Confidence Interval for Mhat matches", {
+  expect_equal(M.CI, myMhatCI)
+})
+
 # test_that("Parameter and SE estimates from the posterior and from extract() match.", {
 #   expect_equal(Mhat[1], mean( rstan::extract(post, "mu")[[1]] ) )
 #   expect_equal( postSumm["mu", "sd"], sd( rstan::extract(post, "mu")[[1]] ) )
 #   expect_equal( MhatSE,postSumm["mu", "sd"] / sqrt( postSumm["mu", "n_eff"] ) )
 # })
-#
-#
-#
+
+
+
