@@ -2,7 +2,7 @@
 % Please edit documentation in R/functions.R
 \name{estimate_jeffreys_mcmc}
 \alias{estimate_jeffreys_mcmc}
-\title{Finds the MAP estimates for mu and sigma of the full normal distribution, given data from a truncated normal.}
+\title{Estimates the posterior modes for the parameters of the underlying normal distribution, given truncated data}
 \usage{
 estimate_jeffreys_mcmc(
   x,
@@ -30,7 +30,7 @@ estimate_jeffreys_mcmc(
 \item{...}{Parameters to pass to sampling()}
 }
 \description{
-Finds the MAP estimates for mu and sigma of the full normal distribution, given data from a truncated normal.
+Estimates the posterior modes for the parameters of the underlying normal distribution, given truncated data
 }
 \references{
 https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html
