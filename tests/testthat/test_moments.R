@@ -9,7 +9,7 @@
 
 ######## DEFINING VARIABLES #########
 
-# compare fitting model manually vs. with estimate_jeffreys_mcmc
+# compare fitting model manually vs. with trunc_est
 
 n <- 20
 m <- 1.2
@@ -102,10 +102,10 @@ M.CI <- c( postSumm["mu", "2.5%"], postSumm["mu", "97.5%"] )
 # Mhat <- c( postSumm["mu", "mean"], median( rstan::extract(post, "mu")[[1]] ) )
 MhatSE <- postSumm["mu", "se_mean"]
 
-# now with estimate_jeffreys_mcmc
-#MM: this is what needs to be tested: compare the manual fit to the package
-# remember also to test the other arguments, like ci.level, as we discussed earlier
-res = estimate_jeffreys_mcmc(
+# now with trunc_est: to be filled in
+#MM: the tests need to compare the manual fit to the package, not the manual fit to itself
+# remember also to test the other arguments, like ci.level, a, b, by trying differently values, as we discussed earlier
+res = trunc_est(
   x = x,
   a = a,
   b = b )
@@ -113,6 +113,7 @@ res = estimate_jeffreys_mcmc(
 
 ######## AUXILIARY FUNCTIONS #########
 
+#MM: are these ever used?
 # Auxiliary function. Defined within function, so testthat cannot call the function.
 # Calculates E(x-mu)
 Ex_min_m <- function( m, s, ul, uh) {
@@ -127,15 +128,7 @@ Ex_min_m_sq <- function(m, s, ul, uh) {
 
 ######## TESTS #########
 
-test_that("Confidence Interval for Mhat matches", {
-  expect_equal(M.CI, myMhatCI)
-})
 
-# test_that("Parameter and SE estimates from the posterior and from extract() match.", {
-#   expect_equal(Mhat[1], mean( rstan::extract(post, "mu")[[1]] ) )
-#   expect_equal( postSumm["mu", "sd"], sd( rstan::extract(post, "mu")[[1]] ) )
-#   expect_equal( MhatSE,postSumm["mu", "sd"] / sqrt( postSumm["mu", "n_eff"] ) )
-# })
 
 
 
