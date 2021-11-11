@@ -105,6 +105,7 @@ MhatSE <- postSumm["mu", "se_mean"]
 # now with trunc_est: to be filled in
 #MM: the tests need to compare the manual fit to the package, not the manual fit to itself
 # remember also to test the other arguments, like ci.level, a, b, by trying differently values, as we discussed earlier
+# remember also that we need to test that the functions generate the appropriate warnings when users pass bad input, etc.
 res = trunc_est(
   x = x,
   a = a,
