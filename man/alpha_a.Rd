@@ -2,19 +2,19 @@
 % Please edit documentation in R/functions.R
 \name{alpha_a}
 \alias{alpha_a}
-\title{Return the conditional density of a normal random variable, given that its value is between .a and .b, evaluated at Za.}
+\title{Return the conditional density of a normal random variable, given that its value is between a and b, evaluated at Za.}
 \usage{
-alpha_a(.mean, .sd, .a, .b)
+alpha_a(mean, sd, a, b)
 }
 \arguments{
-\item{.mean}{Mean of normal distribution.}
+\item{mean}{Mean of normal distribution.}
 
-\item{.sd}{Standard deviation of normal distribution.}
+\item{sd}{Standard deviation of normal distribution.}
 
-\item{.a}{Unstandardized lower truncation limit.}
+\item{a}{Unstandardized lower truncation limit.}
 
-\item{.b}{Unstandardized upper truncation limit.}
+\item{b}{Unstandardized upper truncation limit.}
 }
 \description{
-Return the conditional density of a normal random variable, given that its value is between .a and .b, evaluated at Za.
+Return the conditional density of a normal random variable, given that its value is between a and b, evaluated at Za.
 }

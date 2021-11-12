@@ -12,10 +12,10 @@
 # compare fitting model manually vs. with trunc_est
 
 n <- 20
-m <- 1.2
-s <- 8
-ul <- 0
-uh <- 3
+m <-0
+s <- 1
+a <- -3
+b <- 3
 x <- c(0.385258397941442, 1.68066267127739, 0.729227742032434, 0.479120432291688,
        0.897279068695914, 0.0575356881970433, 0.165652783807015, 0.875647820475464,
        0.380168104717168, 0.825551957468494, 0.589842597791253, 0.402854395794205,
@@ -94,7 +94,7 @@ r.lim <- 0.975
 # need to have isystem arg to avoid "syntax error"
 # but either way, it says parsing has been successful
 stan.model <- stan_model(model_code = model.text, verbose = TRUE)
-post <- sampling(stan.model, data = list( n = length(x), a = ul, b = uh, y = x, iters=100))
+post <- sampling(stan.model, data = list( n = length(x), a = a, b = b, y = x, iters=100))
 
 
 postSumm <- summary(post)$summary
@@ -108,24 +108,12 @@ MhatSE <- postSumm["mu", "se_mean"]
 # remember also that we need to test that the functions generate the appropriate warnings when users pass bad input, etc.
 res = trunc_est(
   x = x,
+  mean.start = m,
+  sd.start = s,
   a = a,
   b = b )
 
 
-######## AUXILIARY FUNCTIONS #########
-
-#MM: are these ever used?
-# Auxiliary function. Defined within function, so testthat cannot call the function.
-# Calculates E(x-mu)
-Ex_min_m <- function( m, s, ul, uh) {
-  (s * (alphal( m, s, ul, uh) - alphah( m, s, ul, uh)) )
-}
-
-# Auxiliary function. Defined within function, so testthat cannot call the function.
-# Calculates E(x-mu)^2
-Ex_min_m_sq <- function(m, s, ul, uh) {
-  (s**2 * (1 + usl(m, s, ul, uh) * alphal(m, s, ul, uh) - ush(m, s, ul, uh) * alphah(m, s, ul, uh)) )
-}
 
 ######## TESTS #########
 

@@ -6,42 +6,39 @@ library(truncnorm)
 library(testit)
 ################################ INTERMEDIATE TERMS ################################
 
-.d_key <- c(m= ".mean", s=".sd" )
-
-
-#' Return the conditional density of a normal random variable, given that its value is between .a and .b, evaluated at Za.
+#' Return the conditional density of a normal random variable, given that its value is between a and b, evaluated at Za.
 #'
-#' @param .mean Mean of normal distribution.
-#' @param .sd Standard deviation of normal distribution.
-#' @param .a Unstandardized lower truncation limit.
-#' @param .b Unstandardized upper truncation limit.
+#' @param mean Mean of normal distribution.
+#' @param sd Standard deviation of normal distribution.
+#' @param a Unstandardized lower truncation limit.
+#' @param b Unstandardized upper truncation limit.
 #' @importFrom stats dnorm pnorm
 
-alpha_a <- function(.mean, .sd, .a, .b) {
+alpha_a <- function(mean, sd, a, b) {
 
   Z_score <- function(mean, sd, x){ (x-mean)/sd }
 
-  Za = Z_score(.mean, .sd, .a)
-  Zb = Z_score(.mean, .sd, .b)
+  Za = Z_score(mean, sd, a)
+  Zb = Z_score(mean, sd, b)
 
   dnorm(Za) / (pnorm(Zb) - pnorm(Za))
 }
 
-#' Return the conditional density of a normal random variable, given that its value is between .a and .b, evaluated at Zb.
+#' Return the conditional density of a normal random variable, given that its value is between a and b, evaluated at Zb.
 #'
-#' @param .mean Mean of normal distribution.
-#' @param .sd Standard deviation of normal distribution.
-#' @param .a Unstandardized lower truncation limit.
-#' @param .b Unstandardized upper truncation limit.
+#' @param mean Mean of normal distribution.
+#' @param sd Standard deviation of normal distribution.
+#' @param a Unstandardized lower truncation limit.
+#' @param b Unstandardized upper truncation limit.
 #' @importFrom stats dnorm pnorm
 
 
-alpha_b <- function(.mean, .sd, .a, .b) {
+alpha_b <- function(mean, sd, a, b) {
 
   Z_score <- function(mean, sd, x){ (x-mean)/sd }
 
-  Za = Z_score(.mean, .sd, .a)
-  Zb = Z_score(.mean, .sd, .b)
+  Za = Z_score(mean, sd, a)
+  Zb = Z_score(mean, sd, b)
 
   dnorm(Za) / (pnorm(Zb) - pnorm(Za))
 }
@@ -52,39 +49,35 @@ alpha_b <- function(.mean, .sd, .a, .b) {
 #'
 #' @param mean Mean of normal distribution.
 #' @param sd Standard deviation of normal distribution.
-#' @param .x Data to use log likelihood calculation.
-#' @param .a Left truncation limit.
-#' @param .b Right truncation limit.
+#' @param x Data to use log likelihood calculation.
+#' @param a Left truncation limit.
+#' @param b Right truncation limit.
 #'
 #' @example
-#' nlpost_jeffreys(mean = 1, sd = 1, .x = 2, .a = -5, .b = 5)
+#' nlpost_jeffreys(mean = 1, sd = 1, x = c(2), a = -5, b = 5)
 #'
 #' @importFrom mvtnorm dmvnorm pmvnorm
 
-nlpost_jeffreys = function(mean, sd, .x, .a, .b) {
-  assert("Right truncation point must be larger than left truncation point" , .a < .b )
+nlpost_jeffreys <- function(mean, sd, x, a, b) {
+  #assert("Right truncation point must be larger than left truncation point" , a < b )
 
-  #MM: Leon, please change .mu and .sigma below to mean and sd instead of this hack I introduced
-  .mu = mean
-  .sigma = sd
-
-  if ( .sigma < 0 ) return(.Machine$integer.max)
+  if ( sd < 0 ) return(.Machine$integer.max)
 
   # as in nll()
-  term1 = dmvnorm(x = as.matrix(.x, nrow = 1),
-                  mean = as.matrix(.mu, nrow = 1),
+  term1 = dmvnorm(x = as.matrix(x, nrow = 1),
+                  mean = as.matrix(mean, nrow = 1),
                   # sigma here is covariance matrix,
-                  sigma = as.matrix(.sigma^2, nrow=1),
+                  sigma = as.matrix(sd^2, nrow=1),
                   log = TRUE)
 
 
-  term2 = length(.x) * log( pmvnorm(lower = .a,
-                                    upper = .b,
-                                    mean = .mu,
+  term2 = length(x) * log( pmvnorm(lower = a,
+                                    upper = b,
+                                    mean = mean,
                                     # remember sigma here is covariance matrix, not the SD
-                                    sigma = .sigma^2 ) )
+                                    sigma = sd^2 ) )
 
-  term3 = log( sqrt( det( E_fisher(.mean = .mu, .sd = .sigma, .n = length(.x), .a = .a, .b = .b) ) ) )
+  term3 = log( sqrt( det( E_fisher(mean = mean, sd = sd, n = length(x), a = a, b = b) ) ) )
 
   nlp.value = -( sum(term1) - term2 + term3 )
 
@@ -129,7 +122,7 @@ nlpost_jeffreys = function(mean, sd, .x, .a, .b) {
 #' @references
 #' https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html
 
-#MM: I retitled this fn
+
 trunc_est <- function(x,
                       mean.start = 0,
                       sd.start = 1,
@@ -137,7 +130,7 @@ trunc_est <- function(x,
                       a,
                       b,
                       ...) {
-  assert("sd.start must be positive", sd.start > 0)
+  #assert("sd.start must be positive", sd.start > 0)
   model.text <- "
 functions{
 	real jeffreys_prior(real mu, real sigma, real a, real b, int n){
@@ -234,91 +227,91 @@ withCallingHandlers({
 
 postSumm <- summary(post)$summary
 
-nlpost_simple = function(.mean, .sd, x, a, b) {
-  nlpost.value = nlpost_jeffreys(.pars = c(.mean, .sd),
-                                 .x = x, .a = a, .b = b)
+nlpost_simple = function(mean, sd, x, a, b) {
+  nlpost.value = nlpost_jeffreys(mean, sd, x = x, a = a, b = b)
   return(nlpost.value)
 }
 
 
 res <- mle( minuslogl = nlpost_simple,
-            start = list( .mu=mean.start, .sigma=sd.start) )
+            start = list(mean=mean.start, sd= sd.start) )
 
 
 maps <- as.numeric(coef(res))
 
 # posterior means, then medians
-Mhat = c( postSumm["mu", "mean"], median( rstan::extract(post, "mu")[[1]] ) )
-Shat = c( postSumm["sigma", "mean"], median( rstan::extract(post, "sigma")[[1]] ) )
+mean.est = c( postSumm["mu", "mean"], median( rstan::extract(post, "mu")[[1]] ) )
+sd.est = c( postSumm["sigma", "mean"], median( rstan::extract(post, "sigma")[[1]] ) )
 
 # SEs
-MhatSE = postSumm["mu", "se_mean"]
-ShatSE = postSumm["sigma", "se_mean"]
+mean.se = postSumm["mu", "se_mean"]
+sd.se = postSumm["sigma", "se_mean"]
 
 # convert the numeric ci.level to strings of percentages.
 l.lim.str <- paste0(toString(1-ci.level * 100), "%")
 r.lim.str <- paste0(toString((ci.level) * 100), "%")
 
 # CI limits
-S.CI = c( postSumm["sigma", l.lim.str], postSumm["sigma", r.lim.str] )
-M.CI = c( postSumm["mu", l.lim.str], postSumm["mu", r.lim.str] )
+sd.ci.lims = c( postSumm["sigma", l.lim.str], postSumm["sigma", r.lim.str] )
+mean.ci.lims = c( postSumm["mu", l.lim.str], postSumm["mu", r.lim.str] )
 
 
-myMhatCI = as.numeric( c( quantile( rstan::extract(post, "mu")[[1]], 1-ci.level ),
+mean.ci = as.numeric( c( quantile( rstan::extract(post, "mu")[[1]], 1-ci.level ),
                           quantile( rstan::extract(post, "mu")[[1]], ci.level ) ) )
 
-
+sd.ci = as.numeric( c( quantile( rstan::extract(post, "sigma")[[1]], 1-ci.level ),
+                         quantile( rstan::extract(post, "sigma")[[1]], ci.level ) ) )
 # the point estimates are length 2 (post means, then medians),
 #  but the inference is the same for each type of point estimate
 return( list( post = post,
-              mean.est = Mhat,
-              sd.est = Shat,
+              mean.est = mean.est,
+              sd.est = sd.est,
 
               #MM: Sync terminology throughout (including above as well). These should be "mean.se", "sd.se", etc.
-              MhatSE = rep(MhatSE, 2),
-              ShatSE = rep(ShatSE, 2),
+              mean.se = rep(mean.se, 2),
+              sd.se= rep(sd.se, 2),
 
               #MM: Similarly, should be "mean.ci", "sd.ci", etc.
-              M.CI = M.CI,
-              S.CI = S.CI,
+              mean.ci = mean.ci,
+              sd.ci = sd.ci,
 
               stan.warned = stan.warned,
               stan.warning = stan.warning,
 
-              MhatRhat = postSumm["mu", "Rhat"],
-              ShatRhat = postSumm["sigma", "Rhat"]
+              mean.rhat = postSumm["mu", "Rhat"],
+              sd.rhat = postSumm["sigma", "Rhat"]
 ) )
 }
 
 #' Finds the Fisher information matrix contained in n samples from a truncated normal distribution.
 
-#' @param .mean Mean of underlying normal distribution.
-#' @param .sd Standard deviation of underlying normal distribution.
-#' @param .n Number of observations.
-#' @param .a Lower truncation limit.
-#' @param .b Upper truncation limit.
+#' @param mean Mean of underlying normal distribution.
+#' @param sd Standard deviation of underlying normal distribution.
+#' @param n Number of observations.
+#' @param a Lower truncation limit.
+#' @param b Upper truncation limit.
 #' @importFrom assert assert
 #' @importFrom stats dnorm pnorm
 
-E_fisher = function(.mean, .sd, .n, .a, .b) {
-  #assert("Positive standard deviation: ", .sd > 0)
-  #assert("Left truncation before right truncation: ", .a < .b)
+E_fisher = function(mean, sd, n, a, b) {
+  #assert("Positive standard deviation: ", sd > 0)
+  #assert("Left truncation before right truncation: ", a < b)
 
-  Za = (.a - .mean) / .sd
-  Zb = (.b - .mean) / .sd
+  Za = (a - mean) / sd
+  Zb = (b - mean) / sd
 
   #MM: use the helper fn defined above for these?
   alpha.a = dnorm(Za) / ( pnorm(Zb) - pnorm(Za) )
   alpha.b = dnorm(Zb) / ( pnorm(Zb) - pnorm(Za) )
 
-  k11 = -(.n/.sd^2) + (.n/.sd^2)*( (alpha.b - alpha.a)^2 + (alpha.b*Zb - alpha.a*Za) )
+  k11 = -(n/sd^2) + (n/sd^2)*( (alpha.b - alpha.a)^2 + (alpha.b*Zb - alpha.a*Za) )
 
-  k12 = -( 2*.n*(alpha.a - alpha.b) / .sd^2 ) +
-    (.n/.sd^2)*( alpha.a - alpha.b + alpha.b*Zb^2 - alpha.a*Za^2 +
+  k12 = -( 2*n*(alpha.a - alpha.b) / sd^2 ) +
+    (n/sd^2)*( alpha.a - alpha.b + alpha.b*Zb^2 - alpha.a*Za^2 +
                    (alpha.a - alpha.b)*(alpha.a*Za - alpha.b*Zb) )
 
-  k22 = (.n/.sd^2) - (3*.n*(1 + alpha.a*Za - alpha.b*Zb) / .sd^2) +
-    (.n/.sd^2)*( Zb*alpha.b*(Zb^2 - 2) - Za*alpha.a*(Za^2 - 2) +
+  k22 = (n/sd^2) - (3*n*(1 + alpha.a*Za - alpha.b*Zb) / sd^2) +
+    (n/sd^2)*( Zb*alpha.b*(Zb^2 - 2) - Za*alpha.a*(Za^2 - 2) +
                    (alpha.b*Zb - alpha.a*Za)^2 )
 
   return( matrix( c(-k11, -k12, -k12, -k22),
@@ -328,44 +321,16 @@ E_fisher = function(.mean, .sd, .n, .a, .b) {
 
 #' Returns the value of the Jeffreys prior.
 #'
-#' @param .pars Vector of parameters specifying mean and standard deviation.
-#' @param .x Data to use log likelihood calculation.
-#' @param .a Left truncation limit.
-#' @param .b Right truncation limit.
+#' @param mean Mean of untruncated normal distribution
+#' @param sd Standard deviation of untruncated normal distribution.
+#' @param x Data to use log likelihood calculation.
+#' @param a Left truncation limit.
+#' @param b Right truncation limit.
 
-prior = function(.pars, .x, .a, .b) {
-  assert("Left truncation before right truncation: ", .a < .b)
-  #MM: Separate pars into mean, sd as illustrated above
-  .mu = .pars[1]
-  .sigma = .pars[2]
+prior = function(mean, sd, x, a, b) {
+  #assert("Left truncation before right truncation: ", a < b)
 
-
-  return (log( sqrt( det( E_fisher(.mean = .mu, .sd = .sigma, .n = length(.x), .a = .a, .b = .b) ) ) ))
+  return (log( sqrt( det( E_fisher(mean = mean, sd = sd, n = length(x), a = a, b = b) ) ) ))
 }
 
-#' Returns the value of the negative log-posterior with the Jeffrey's prior.
-#'
-#' @param .pars Vector specifying mu and sigma.
-#' @param .x Data to use log likelihood calculation.
-#' @param .a Left truncation limit.
-#' @param .b Right truncation limit.
-#'
-#' @example
-#' mu <- 1
-#' sigma <- 1
-#' neg_log_post(c(mu, sigma), 1, -5, 5)
-#'
-#' @importFrom truncnorm dtruncnorm
 
-#MM: Is this fn redundant with nlpost_jeffreys?
-neg_log_post = function(.pars, .x, .a, .b) {
-  assert("Positive standard deviation: ", .pars[2] > 0)
-  assert("Left truncation before right truncation: ", .a < .b)
-  .mu = .pars[1]
-  .sigma = .pars[2]
-
-  # regular LL part
-  -sum( log( dtruncnorm(x = .x, a = .a, b = .b, mean = .mu, sd = .sigma) ) ) -
-    # Jeffreys part
-    log( sqrt( det( E_fisher(.mean = .mu, .sd = .sigma, .n = length(.x), .a = .a, .b = .b) ) ) )
-}

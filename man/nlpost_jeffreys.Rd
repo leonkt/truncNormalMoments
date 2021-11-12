@@ -4,18 +4,18 @@
 \alias{nlpost_jeffreys}
 \title{Calculate the negative log posterior under the Jeffreys prior}
 \usage{
-nlpost_jeffreys(mean, sd, .x, .a, .b)
+nlpost_jeffreys(mean, sd, x, a, b)
 }
 \arguments{
 \item{mean}{Mean of normal distribution.}
 
 \item{sd}{Standard deviation of normal distribution.}
 
-\item{.x}{Data to use log likelihood calculation.}
+\item{x}{Data to use log likelihood calculation.}
 
-\item{.a}{Left truncation limit.}
+\item{a}{Left truncation limit.}
 
-\item{.b}{Right truncation limit.}
+\item{b}{Right truncation limit.}
 }
 \description{
 Calculate the negative log posterior under the Jeffreys prior

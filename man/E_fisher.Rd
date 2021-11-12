@@ -4,18 +4,18 @@
 \alias{E_fisher}
 \title{Finds the Fisher information matrix contained in n samples from a truncated normal distribution.}
 \usage{
-E_fisher(.mean, .sd, .n, .a, .b)
+E_fisher(mean, sd, n, a, b)
 }
 \arguments{
-\item{.mean}{Mean of underlying normal distribution.}
+\item{mean}{Mean of underlying normal distribution.}
 
-\item{.sd}{Standard deviation of underlying normal distribution.}
+\item{sd}{Standard deviation of underlying normal distribution.}
 
-\item{.n}{Number of observations.}
+\item{n}{Number of observations.}
 
-\item{.a}{Lower truncation limit.}
+\item{a}{Lower truncation limit.}
 
-\item{.b}{Upper truncation limit.}
+\item{b}{Upper truncation limit.}
 }
 \description{
 Finds the Fisher information matrix contained in n samples from a truncated normal distribution.

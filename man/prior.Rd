@@ -4,16 +4,18 @@
 \alias{prior}
 \title{Returns the value of the Jeffreys prior.}
 \usage{
-prior(.pars, .x, .a, .b)
+prior(mean, sd, x, a, b)
 }
 \arguments{
-\item{.pars}{Vector of parameters specifying mean and standard deviation.}
+\item{mean}{Mean of untruncated normal distribution}
 
-\item{.x}{Data to use log likelihood calculation.}
+\item{sd}{Standard deviation of untruncated normal distribution.}
 
-\item{.a}{Left truncation limit.}
+\item{x}{Data to use log likelihood calculation.}
 
-\item{.b}{Right truncation limit.}
+\item{a}{Left truncation limit.}
+
+\item{b}{Right truncation limit.}
 }
 \description{
 Returns the value of the Jeffreys prior.
