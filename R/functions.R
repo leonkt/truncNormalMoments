@@ -267,11 +267,9 @@ return( list( post = post,
               mean.est = mean.est,
               sd.est = sd.est,
 
-              #MM: Sync terminology throughout (including above as well). These should be "mean.se", "sd.se", etc.
               mean.se = rep(mean.se, 2),
               sd.se= rep(sd.se, 2),
 
-              #MM: Similarly, should be "mean.ci", "sd.ci", etc.
               mean.ci = mean.ci,
               sd.ci = sd.ci,
 
