@@ -234,7 +234,7 @@ nlpost_simple = function(mean, sd, x, a, b) {
 
 
 res <- mle( minuslogl = nlpost_simple,
-            start = list(mean=mean.start, sd= sd.start) )
+            start = list(mean=mean.start, sd= sd.start), method="Nelder-Mead" )
 
 
 maps <- as.numeric(coef(res))

@@ -14,8 +14,10 @@
 n <- 20
 m <-0
 s <- 1
-a <- -3
-b <- 3
+a <- 0
+b <- 2
+a.alt <- -1
+b.alt <- 4
 x <- c(0.385258397941442, 1.68066267127739, 0.729227742032434, 0.479120432291688,
        0.897279068695914, 0.0575356881970433, 0.165652783807015, 0.875647820475464,
        0.380168104717168, 0.825551957468494, 0.589842597791253, 0.402854395794205,
@@ -87,20 +89,20 @@ generated quantities{
   log_post = log_lik + log_prior;
 }
 "
-l.lim <- 0.025
-r.lim <- 0.975
+
 
 
 # need to have isystem arg to avoid "syntax error"
 # but either way, it says parsing has been successful
 stan.model <- stan_model(model_code = model.text, verbose = TRUE)
-post <- sampling(stan.model, data = list( n = length(x), a = a, b = b, y = x, iters=100))
+post <- sampling(stan.model, data = list( n = length(x), a = a.alt, b = b.alt, y = x, iters=100))
 
 
 postSumm <- summary(post)$summary
-M.CI <- c( postSumm["mu", "2.5%"], postSumm["mu", "97.5%"] )
-# Mhat <- c( postSumm["mu", "mean"], median( rstan::extract(post, "mu")[[1]] ) )
-MhatSE <- postSumm["mu", "se_mean"]
+meanCI <- c( postSumm["mu", "2.5%"], postSumm["mu", "97.5%"] )
+meanSE <- postSumm["mu", "se_mean"]
+
+meanCI.75 <- c( postSumm["mu", "25%"], postSumm["mu", "75%"] )
 
 # now with trunc_est: to be filled in
 #MM: the tests need to compare the manual fit to the package, not the manual fit to itself
@@ -111,13 +113,32 @@ res = trunc_est(
   mean.start = m,
   sd.start = s,
   a = a,
-  b = b )
+  b = b,
+  ci.level=0.75)
+
+res.alt <- trunc_est(
+  x = x,
+  mean.start = m,
+  sd.start = s,
+  a = a.alt,
+  b = b.alt,
+  ci.level=0.975)
 
 
 
 ######## TESTS #########
+test_that("trunc_est matches STAN confidence intervals, 97.5%.", {
+  expect_equal(meanCI[1], res.alt$mean.ci[1])
+  expect_equal(meanCI[2], res.alt$mean.ci[2])
+})
 
+test_that("trunc_est matches STAN standard errors.", {
+  expect_equal(meanSE[1], res.alt$mean.se[1])
+})
 
-
+test_that("trunc_est matches STAN confidence intervals, 95%.", {
+  expect_equal(meanCI.75[1], res$mean.ci[1])
+  expect_equal(meanCI.75[2], res$mean.ci[2])
+})
 
 
