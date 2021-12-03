@@ -227,7 +227,6 @@ withCallingHandlers({
 
 
 postSumm <- summary(post)$summary
-
 nlpost_simple = function(mean, sd, x, a, b) {
   nlpost.value = nlpost_jeffreys(mean, sd, x = x, a = a, b = b)
   return(nlpost.value)

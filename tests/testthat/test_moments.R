@@ -18,11 +18,7 @@ a <- 0
 b <- 2
 a.alt <- -1
 b.alt <- 4
-x <- c(0.385258397941442, 1.68066267127739, 0.729227742032434, 0.479120432291688,
-       0.897279068695914, 0.0575356881970433, 0.165652783807015, 0.875647820475464,
-       0.380168104717168, 0.825551957468494, 0.589842597791253, 0.402854395794205,
-       1.7668857263465, 0.649703054651576, 0.83074621395, 0.407612065235468,
-       1.49884534475478, 0.420770708293162, 0.699931456061883, 1.06188921169992)
+x <- runif(n, min=0, max=2)
 
 model.text <- "
 functions{
@@ -95,6 +91,7 @@ generated quantities{
 # need to have isystem arg to avoid "syntax error"
 # but either way, it says parsing has been successful
 stan.model <- stan_model(model_code = model.text, verbose = TRUE)
+
 post <- sampling(stan.model, data = list( n = length(x), a = a.alt, b = b.alt, y = x, iters=100))
 
 
@@ -108,8 +105,11 @@ meanCI.75 <- c( postSumm["mu", "25%"], postSumm["mu", "75%"] )
 #MM: the tests need to compare the manual fit to the package, not the manual fit to itself
 # remember also to test the other arguments, like ci.level, a, b, by trying differently values, as we discussed earlier
 # remember also that we need to test that the functions generate the appropriate warnings when users pass bad input, etc.
-res = trunc_est(
-  x = x,
+res <- trunc_est(x = c(0.385258397941442, 1.68066267127739, 0.729227742032434, 0.479120432291688,
+                       0.897279068695914, 0.0575356881970433, 0.165652783807015, 0.875647820475464,
+                       0.380168104717168, 0.825551957468494, 0.589842597791253, 0.402854395794205,
+                       1.7668857263465, 0.649703054651576, 0.83074621395, 0.407612065235468,
+                       1.49884534475478, 0.420770708293162, 0.699931456061883, 1.06188921169992),
   mean.start = m,
   sd.start = s,
   a = a,
@@ -126,19 +126,19 @@ res.alt <- trunc_est(
 
 
 
-######## TESTS #########
-test_that("trunc_est matches STAN confidence intervals, 97.5%.", {
-  expect_equal(meanCI[1], res.alt$mean.ci[1])
-  expect_equal(meanCI[2], res.alt$mean.ci[2])
-})
+ ##### TESTS #########
+ test_that("trunc_est matches STAN confidence intervals, 97.5%.", {
+   expect_equal(meanCI[1], res.alt$mean.ci[1])
+   expect_equal(meanCI[2], res.alt$mean.ci[2])
+ })
 
-test_that("trunc_est matches STAN standard errors.", {
-  expect_equal(meanSE[1], res.alt$mean.se[1])
-})
+ test_that("trunc_est matches STAN standard errors.", {
+   expect_equal(meanSE[1], res.alt$mean.se[1])
+ })
 
-test_that("trunc_est matches STAN confidence intervals, 95%.", {
-  expect_equal(meanCI.75[1], res$mean.ci[1])
-  expect_equal(meanCI.75[2], res$mean.ci[2])
-})
+ test_that("trunc_est matches STAN confidence intervals, 95%.", {
+   expect_equal(meanCI.75[1], res$mean.ci[1])
+   expect_equal(meanCI.75[2], res$mean.ci[2])
+ })
 
 
