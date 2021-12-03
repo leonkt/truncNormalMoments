@@ -72,10 +72,10 @@ nlpost_jeffreys <- function(mean, sd, x, a, b) {
 
 
   term2 = length(x) * log( pmvnorm(lower = a,
-                                    upper = b,
-                                    mean = mean,
-                                    # remember sigma here is covariance matrix, not the SD
-                                    sigma = sd^2 ) )
+                                   upper = b,
+                                   mean = mean,
+                                   # remember sigma here is covariance matrix, not the SD
+                                   sigma = sd^2 ) )
 
   term3 = log( sqrt( det( E_fisher(mean = mean, sd = sd, n = length(x), a = a, b = b) ) ) )
 
@@ -257,10 +257,10 @@ mean.ci.lims = c( postSumm["mu", l.lim.str], postSumm["mu", r.lim.str] )
 
 
 mean.ci = as.numeric( c( quantile( rstan::extract(post, "mu")[[1]], 1-ci.level ),
-                          quantile( rstan::extract(post, "mu")[[1]], ci.level ) ) )
+                         quantile( rstan::extract(post, "mu")[[1]], ci.level ) ) )
 
 sd.ci = as.numeric( c( quantile( rstan::extract(post, "sigma")[[1]], 1-ci.level ),
-                         quantile( rstan::extract(post, "sigma")[[1]], ci.level ) ) )
+                       quantile( rstan::extract(post, "sigma")[[1]], ci.level ) ) )
 # the point estimates are length 2 (post means, then medians),
 #  but the inference is the same for each type of point estimate
 return( list( post = post,
@@ -306,11 +306,11 @@ E_fisher = function(mean, sd, n, a, b) {
 
   k12 = -( 2*n*(alpha.a - alpha.b) / sd^2 ) +
     (n/sd^2)*( alpha.a - alpha.b + alpha.b*Zb^2 - alpha.a*Za^2 +
-                   (alpha.a - alpha.b)*(alpha.a*Za - alpha.b*Zb) )
+                 (alpha.a - alpha.b)*(alpha.a*Za - alpha.b*Zb) )
 
   k22 = (n/sd^2) - (3*n*(1 + alpha.a*Za - alpha.b*Zb) / sd^2) +
     (n/sd^2)*( Zb*alpha.b*(Zb^2 - 2) - Za*alpha.a*(Za^2 - 2) +
-                   (alpha.b*Zb - alpha.a*Za)^2 )
+                 (alpha.b*Zb - alpha.a*Za)^2 )
 
   return( matrix( c(-k11, -k12, -k12, -k22),
                   nrow = 2,
