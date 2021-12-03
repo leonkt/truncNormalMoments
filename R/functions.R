@@ -213,10 +213,11 @@ withCallingHandlers({
   stan.model <- stan_model(model_code = model.text,
                            isystem = "~/Desktop")
 
+
   post = sampling(stan.model,
                   cores = 1,
-                  refresh = 0,
-                  init = init.fcn, data=c(n=length(x), a=a, b=b, y=x), ...)
+                  #refresh = 0,
+                  init = init.fcn, data=list(n=length(x), a=a, b=b, y=x), ...)
 
 
 }, warning = function(condition){
