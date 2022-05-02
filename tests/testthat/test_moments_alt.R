@@ -89,7 +89,9 @@ generated quantities{
 # but either way, it says parsing has been successful
 stan.model <- stan_model(model_code = model.text, verbose = TRUE)
 
-post.alt <- sampling(stan.model, data = list( n = length(x.alt), a = a.alt, b = b.alt, y = x.alt, iters=100))
+post.alt <- sampling(stan.model, data = list( n = length(x.alt),
+                                              a = a.alt, b = b.alt,
+                                              y = x.alt, iters=100))
 
 postSumm.alt <- summary(post.alt)$summary
 meanSE.alt <- postSumm.alt["mu", "se_mean"]

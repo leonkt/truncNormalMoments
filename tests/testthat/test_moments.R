@@ -108,9 +108,14 @@ res <- trunc_est(x = x,
 
 
  ##### TESTS #########
+
+# We use an arbitrary fixed threshold rather than one that relies on
+# the SEs from STAN since this test is to detect any obvious
+# errors...
+
  test_that("trunc_est approx. matches STAN MAPs.", {
-   expect_lt(abs(meanCI[1]- res$mean.ci[1]),2)
-   expect_lt(abs(meanCI[2]- res$mean.ci[2]),2)
+   expect_lt(abs(meanCI[1]- res$mean.ci[1]),1)
+   expect_lt(abs(meanCI[2]- res$mean.ci[2]),1)
 
  })
 
