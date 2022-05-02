@@ -2,8 +2,11 @@
 library(testthat)
 library(rstan)
 library(Deriv)
+library(mvtnorm)
 library(truncnorm)
 library(testit)
+library(stats4)
+library(stats)
 ################################ INTERMEDIATE TERMS ################################
 
 #' Return the conditional density of a normal random variable, given that its value is between a and b, evaluated at Za.
@@ -64,22 +67,22 @@ nlpost_jeffreys <- function(mean, sd, x, a, b) {
   if ( sd < 0 ) return(.Machine$integer.max)
 
   # as in nll()
-  term1 = dmvnorm(x = as.matrix(x, nrow = 1),
+  term1 <- dmvnorm(x = as.matrix(x, nrow = 1),
                   mean = as.matrix(mean, nrow = 1),
                   # sigma here is covariance matrix,
                   sigma = as.matrix(sd^2, nrow=1),
                   log = TRUE)
 
 
-  term2 = length(x) * log( pmvnorm(lower = a,
+  term2 <- length(x) * log( pmvnorm(lower = a,
                                    upper = b,
                                    mean = mean,
                                    # remember sigma here is covariance matrix, not the SD
                                    sigma = sd^2 ) )
 
-  term3 = log( sqrt( det( E_fisher(mean = mean, sd = sd, n = length(x), a = a, b = b) ) ) )
+  term3 <- log( sqrt( det( E_fisher(mean = mean, sd = sd, n = length(x), a = a, b = b) ) ) )
 
-  nlp.value = -( sum(term1) - term2 + term3 )
+  nlp.value <- -( sum(term1) - term2 + term3 )
 
   if ( is.infinite(nlp.value) | is.na(nlp.value) ) {
     return(.Machine$integer.max)
@@ -214,7 +217,7 @@ withCallingHandlers({
                            isystem = "~/Desktop")
 
 
-  post = sampling(stan.model,
+  post <- sampling(stan.model,
                   cores = 1,
                   #refresh = 0,
                   init = init.fcn, data=list(n=length(x), a=a, b=b, y=x), ...)
@@ -225,30 +228,37 @@ withCallingHandlers({
   stan.warning <<- condition$message
 } )
 
+ext <- rstan::extract(post)
+best.ind = which.max(ext$log_post)
+
 
 postSumm <- summary(post)$summary
-nlpost_simple = function(mean, sd, x, a, b) {
-  nlpost.value = nlpost_jeffreys(mean, sd, x = x, a = a, b = b)
+
+print(postSumm)
+nlpost_simple = function(mean, sd) {
+  nlpost.value = nlpost_jeffreys(mean, sd, x, a, b)
   return(nlpost.value)
 }
 
 
 res <- mle( minuslogl = nlpost_simple,
-            start = list(mean=mean.start, sd= sd.start), method="Nelder-Mead" )
+            start = list(mean=ext$mu[best.ind], sd= ext$sigma[best.ind]), method="Nelder-Mead" )
 
 
-maps <- as.numeric(coef(res))
+maps <- as.numeric(stats4::coef(res))
 
 # posterior means, then medians
-mean.est = c( postSumm["mu", "mean"], median( rstan::extract(post, "mu")[[1]] ) )
-sd.est = c( postSumm["sigma", "mean"], median( rstan::extract(post, "sigma")[[1]] ) )
+mean.est <- median(rstan::extract(post, "mu")[[1]])
+sd.est <- median(rstan::extract(post, "sigma")[[1]])
 
+mean.maxlp <- ext$mu[best.ind]
+sd.maxlp <- ext$sigma[best.ind]
 # SEs
 mean.se = postSumm["mu", "se_mean"]
 sd.se = postSumm["sigma", "se_mean"]
 
 # convert the numeric ci.level to strings of percentages.
-l.lim.str <- paste0(toString(1-ci.level * 100), "%")
+l.lim.str <- paste0(toString((1-ci.level) * 100), "%")
 r.lim.str <- paste0(toString((ci.level) * 100), "%")
 
 # CI limits
@@ -267,6 +277,8 @@ return( list( post = post,
               mean.est = mean.est,
               sd.est = sd.est,
 
+              mean.maxlp = mean.maxlp,
+              sd.maxlp = sd.maxlp,
               mean.se = rep(mean.se, 2),
               sd.se= rep(sd.se, 2),
 
@@ -291,7 +303,7 @@ return( list( post = post,
 #' @importFrom assert assert
 #' @importFrom stats dnorm pnorm
 
-E_fisher = function(mean, sd, n, a, b) {
+E_fisher <- function(mean, sd, n, a, b) {
   #assert("Positive standard deviation: ", sd > 0)
   #assert("Left truncation before right truncation: ", a < b)
 
@@ -325,7 +337,7 @@ E_fisher = function(mean, sd, n, a, b) {
 #' @param a Left truncation limit.
 #' @param b Right truncation limit.
 
-prior = function(mean, sd, x, a, b) {
+prior <- function(mean, sd, x, a, b) {
   #assert("Left truncation before right truncation: ", a < b)
 
   return (log( sqrt( det( E_fisher(mean = mean, sd = sd, n = length(x), a = a, b = b) ) ) ))
