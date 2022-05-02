@@ -18,6 +18,8 @@ library(stats)
 #' @importFrom stats dnorm pnorm
 
 alpha_a <- function(mean, sd, a, b) {
+  stopifnot(a < b)
+  stopifnot(sd > 0)
 
   Z_score <- function(mean, sd, x){ (x-mean)/sd }
 
@@ -37,6 +39,8 @@ alpha_a <- function(mean, sd, a, b) {
 
 
 alpha_b <- function(mean, sd, a, b) {
+  stopifnot(a < b)
+  stopifnot(sd > 0)
 
   Z_score <- function(mean, sd, x){ (x-mean)/sd }
 
@@ -62,7 +66,7 @@ alpha_b <- function(mean, sd, a, b) {
 #' @importFrom mvtnorm dmvnorm pmvnorm
 
 nlpost_jeffreys <- function(mean, sd, x, a, b) {
-  #assert("Right truncation point must be larger than left truncation point" , a < b )
+  stopifnot(a < b)
 
   if ( sd < 0 ) return(.Machine$integer.max)
 
@@ -102,21 +106,7 @@ nlpost_jeffreys <- function(mean, sd, x, a, b) {
 #' @param b Right truncation limit.
 #' @param ... Parameters to pass to sampling()
 #' @example
-#'
-#' a <- 1
-#' b <- 5
-#'
-#' mean.start <- 1
-#' sd.start <- 1
-#' iter <- 5000
-#' max_treedepth <- 1
-#'
-#'
-#' # Notice that everything following b is there as part of the ellipsis.
-#' # These are optional, and will be passed directly into sampling(). See references
-#' # for additional information regarding sampling().
-#' trunc_est(c(1.2,2.2,3.2), mean.start, sd.start, ci.level=0.05, a, b,
-#'                        iter = iter)
+#' trunc_est(x=c(-1,-2,1,2), mean.start=1, sd.start=0.5, ci.level=0.975, a=1, b=5)
 #'
 #' @import rstan
 #' @importFrom stats median quantile coef
@@ -133,7 +123,9 @@ trunc_est <- function(x,
                       a,
                       b,
                       ...) {
-  #assert("sd.start must be positive", sd.start > 0)
+  stopifnot(a < b)
+  stopifnot(sd.start > 0)
+
   model.text <- "
 functions{
 	real jeffreys_prior(real mu, real sigma, real a, real b, int n){
@@ -304,15 +296,14 @@ return( list( post = post,
 #' @importFrom stats dnorm pnorm
 
 E_fisher <- function(mean, sd, n, a, b) {
-  #assert("Positive standard deviation: ", sd > 0)
-  #assert("Left truncation before right truncation: ", a < b)
+  stopifnot(sd > 0)
+  stopifnot(a < b)
 
   Za = (a - mean) / sd
   Zb = (b - mean) / sd
 
-  #MM: use the helper fn defined above for these?
-  alpha.a = dnorm(Za) / ( pnorm(Zb) - pnorm(Za) )
-  alpha.b = dnorm(Zb) / ( pnorm(Zb) - pnorm(Za) )
+  alpha.a = alpha_a(mean, sd, a, b)
+  alpha.b = alpha_b(mean, sd, a, b)
 
   k11 = -(n/sd^2) + (n/sd^2)*( (alpha.b - alpha.a)^2 + (alpha.b*Zb - alpha.a*Za) )
 
@@ -338,7 +329,8 @@ E_fisher <- function(mean, sd, n, a, b) {
 #' @param b Right truncation limit.
 
 prior <- function(mean, sd, x, a, b) {
-  #assert("Left truncation before right truncation: ", a < b)
+  stopifnot(a < b)
+  stopifnot(sd > 0)
 
   return (log( sqrt( det( E_fisher(mean = mean, sd = sd, n = length(x), a = a, b = b) ) ) ))
 }
