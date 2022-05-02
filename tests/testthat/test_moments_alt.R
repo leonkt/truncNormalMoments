@@ -1,4 +1,4 @@
-
+gc()
 
 # test issue:
 # - cannot use library(rstan) here
@@ -9,15 +9,14 @@
 
 ######## DEFINING VARIABLES #########
 
-
+# compare fitting model manually vs. with trunc_est
 
 n <- 1000
-m <-0
-s <- 1
-a <- 0
-b <- 2
-
-x <- rtruncnorm(100, a=a, b=b, mean=m, sd=s)
+m <-2
+s <- 0.5
+a.alt <- -1
+b.alt <- 5
+x.alt <- rtruncnorm(500, a=a.alt, b=b.alt, mean=m, sd=s)
 model.text <- "
 functions{
 	real jeffreys_prior(real mu, real sigma, real a, real b, int n){
@@ -90,32 +89,29 @@ generated quantities{
 # but either way, it says parsing has been successful
 stan.model <- stan_model(model_code = model.text, verbose = TRUE)
 
-post <- sampling(stan.model, data = list( n = length(x), a = a, b = b, y = x, iters=100))
+post.alt <- sampling(stan.model, data = list( n = length(x.alt), a = a.alt, b = b.alt, y = x.alt, iters=100))
 
-postSumm <- summary(post)$summary
-meanCI <- c( postSumm["mu", "2.5%"], postSumm["mu", "97.5%"] )
-meanSE <- postSumm["mu", "se_mean"]
+postSumm.alt <- summary(post.alt)$summary
+meanSE.alt <- postSumm.alt["mu", "se_mean"]
+meanCI.75 <- c( postSumm.alt["mu", "25%"], postSumm.alt["mu", "75%"] )
 
-
-res <- trunc_est(x = x,
+res.alt <- trunc_est(
+  x = x.alt,
   mean.start = m,
   sd.start = s,
-  a = a,
-  b = b,
+  a = a.alt,
+  b = b.alt,
   ci.level=0.975)
 
 
 
+##### TESTS #########
 
- ##### TESTS #########
- test_that("trunc_est approx. matches STAN MAPs.", {
-   expect_lt(abs(meanCI[1]- res$mean.ci[1]),2)
-   expect_lt(abs(meanCI[2]- res$mean.ci[2]),2)
 
- })
+test_that("trunc_est approx. matches STAN MAPs.", {
+  expect_lt(abs(meanSE.alt[1]- res.alt$mean.se[1]),  2)
+  expect_lt(abs(meanSE.alt[1]- res.alt$mean.se[1]),  2)
+})
 
 
 gc()
-
-
-
