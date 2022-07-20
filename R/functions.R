@@ -1,3 +1,6 @@
+#' @keywords internal
+z_score <- function(mean, sd, x) (x - mean) / sd
+
 #' Return the conditional density of a normal random variable, given that its
 #' value is between a and b, evaluated at z_a.
 #'
@@ -14,8 +17,6 @@
 alpha_a <- function(mean, sd, a, b) {
   stopifnot(a < b)
   stopifnot(sd > 0)
-
-  z_score <- function(mean, sd, x) (x - mean) / sd
 
   z_a <- z_score(mean, sd, a)
   z_b <- z_score(mean, sd, b)
@@ -40,15 +41,12 @@ alpha_b <- function(mean, sd, a, b) {
   stopifnot(a < b)
   stopifnot(sd > 0)
 
-  z_score <- function(mean, sd, x) (x - mean) / sd
-
   z_a <- z_score(mean, sd, a)
   z_b <- z_score(mean, sd, b)
 
-  dnorm(z_a) / (pnorm(z_b) - pnorm(z_a))
+  # dnorm(z_a) / (pnorm(z_b) - pnorm(z_a))
+  dnorm(z_b) / (pnorm(z_b) - pnorm(z_a)) # TODO: is this right?
 }
-
-
 
 #' Calculate the negative log posterior under the Jeffreys prior
 #'
@@ -59,7 +57,6 @@ alpha_b <- function(mean, sd, a, b) {
 #' @param b Right truncation limit.
 #'
 #' @export
-#'
 #' @examples
 #' nlpost_jeffreys(mean = 1, sd = 1, x = 2, a = -5, b = 5)
 nlpost_jeffreys <- function(mean, sd, x, a, b) {
@@ -105,8 +102,8 @@ nlpost_jeffreys <- function(mean, sd, x, a, b) {
 #' @export
 #'
 #' @examples
-#' trunc_est(x = c(-1,-2,1,2), mean_start = 1, sd_start = 0.5, ci_level = 0.975,
-#'           a = 1, b = 5)
+#' x <- truncnorm::rtruncnorm(100, a = 0, b = 2, mean = 0.5, sd = 0.5)
+#' trunc_est(x, a = 0, b = 2)
 #'
 #' @references
 #' https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html
@@ -119,6 +116,7 @@ trunc_est <- function(x,
                       ...) {
   stopifnot(a < b)
   stopifnot(sd_start > 0)
+  # TODO: assert that x values within truncation limits
 
   model_text <- "
 functions{
@@ -191,7 +189,7 @@ stan_warned <- 0
 stan_warning <- NA
 
 # set start values for sampler
-init_fcn <- function(o) list(mean = mean_start, sd = sd_start)
+init_fcn <- function() list(mean = mean_start, sd = sd_start)
 
 # like tryCatch, but captures warnings without stopping the function from
 #  returning its results
@@ -203,12 +201,11 @@ withCallingHandlers({
   stan_model <- rstan::stan_model(model_code = model_text,
                                   isystem = "~/Desktop")
 
-
-  post <- rstan::sampling(stan_model,
-                          cores = 1,
-                          #refresh = 0,
-                          init = init_fcn,
-                          data = list(n = length(x), a = a, b = b, y = x), ...)
+  stan_fit <- rstan::sampling(stan_model,
+                              cores = 1,
+                              init = init_fcn,
+                              data = list(n = length(x), a = a, b = b, y = x),
+                              ...)
 
 
 }, warning = function(condition) {
@@ -216,69 +213,26 @@ withCallingHandlers({
   stan_warning <<- condition$message
 })
 
-ext <- rstan::extract(post)
-best_ind <- which.max(ext$log_post)
+stan_extract <- rstan::extract(stan_fit)
+stan_summary <- as.data.frame(rstan::summary(stan_fit)$summary[c("mu", "sigma"),])
+means <- stan_summary$mean
+ses <- stan_summary$se_mean
+rhats <- stan_summary$Rhat
 
-post_summ <- summary(post)$summary
+medians <- c(median(stan_extract$mu), median(stan_extract$sigma))
 
-# nlpost_simple <- function(mean, sd) nlpost_jeffreys(mean, sd, x, a, b)
+index_maxlp <- which.max(stan_extract$log_post)
+maxlps <- c(stan_extract$mu[index_maxlp], stan_extract$sigma[index_maxlp])
 
-# res <- stats4::mle(minuslogl = nlpost_simple,
-#                    start = list(mean = ext$mu[best_ind],
-#                                 sd = ext$sigma[best_ind]),
-#                    method = "Nelder-Mead")
+stan_ci <- function(param, q) as.numeric(quantile(stan_extract[[param]], q))
+cil <- c(stan_ci("mu", 1 - ci_level), stan_ci("sigma", 1 - ci_level))
+ciu <- c(stan_ci("mu", ci_level), stan_ci("sigma", ci_level))
 
-# maps <- as.numeric(stats4::coef(res))
+stan_stats <- data.frame(param = c("mean", "sd"), mean = means,
+                         median = medians, maxlp = maxlps, se = ses,
+                         ci_lower = cil, ci_upper = ciu, rhat = rhats)
 
-# posterior means, then medians
-mean_est <- median(rstan::extract(post, "mu")[[1]])
-sd_est <- median(rstan::extract(post, "sigma")[[1]])
-
-mean_maxlp <- ext$mu[best_ind]
-sd_maxlp <- ext$sigma[best_ind]
-# SEs
-mean_se <- post_summ["mu", "se_mean"]
-sd_se <- post_summ["sigma", "se_mean"]
-
-# convert the numeric ci_level to strings of percentages.
-# l.lim.str <- paste0(toString((1 - ci_level) * 100), "%")
-# r.lim.str <- paste0(toString((ci_level) * 100), "%")
-
-# CI limits
-# sd_ci_lims <- c(post_summ["sigma", l.lim.str], post_summ["sigma", r.lim.str])
-# mean_ci_lims <- c(post_summ["mu", l.lim.str], post_summ["mu", r.lim.str])
-
-mean_ci <- as.numeric(
-  c(quantile(rstan::extract(post, "mu")[[1]], 1 - ci_level),
-    quantile(rstan::extract(post, "mu")[[1]], ci_level))
-)
-
-sd_ci <- as.numeric(
-  c(quantile(rstan::extract(post, "sigma")[[1]], 1 - ci_level),
-    quantile(rstan::extract(post, "sigma")[[1]], ci_level))
-)
-
-
-# the point estimates are length 2 (post means, then medians), but the inference
-# is the same for each type of point estimate
-
-return(list(post = post,
-            mean_est = mean_est,
-            sd_est = sd_est,
-
-            mean_maxlp = mean_maxlp,
-            sd_maxlp = sd_maxlp,
-            mean_se = rep(mean_se, 2),
-            sd_se = rep(sd_se, 2),
-
-            mean_ci = mean_ci,
-            sd_ci = sd_ci,
-
-            stan_warned = stan_warned,
-            stan_warning = stan_warning,
-
-            mean_rhat = post_summ["mu", "Rhat"],
-            sd_rhat = post_summ["sigma", "Rhat"]))
+return(list(stats = stan_stats, fit = stan_fit))
 }
 
 #' Finds the Fisher information matrix contained in n samples from a truncated
@@ -290,32 +244,31 @@ return(list(post = post,
 #' @param a Lower truncation limit.
 #' @param b Upper truncation limit.
 #'
-#' @importFrom stats dnorm pnorm
 #' @export
-#'
 #' @examples
 #' e_fisher(mean = 1, sd = 1, n = 10, a = -5, b = 5)
 e_fisher <- function(mean, sd, n, a, b) {
   stopifnot(sd > 0)
   stopifnot(a < b)
 
-  z_a <- (a - mean) / sd
-  z_b <- (b - mean) / sd
+  z_a <- z_score(mean, sd, a)
+  z_b <- z_score(mean, sd, b)
 
-  alpha_a <- alpha_a(mean, sd, a, b)
-  alpha_b <- alpha_b(mean, sd, a, b)
+  alp_a <- alpha_a(mean, sd, a, b)
+  alp_b <- alpha_b(mean, sd, a, b)
 
-  k11 <- -(n / sd ^ 2) + (n / sd ^ 2) * ((alpha_b - alpha_a) ^ 2 +
-                                           (alpha_b * z_b - alpha_a * z_a))
+  k11 <- -(n / sd ^ 2) + (n / sd ^ 2) *
+    ((alp_b - alp_a) ^ 2 + (alp_b * z_b - alp_a * z_a))
 
-  k12 <- -(2 * n * (alpha_a - alpha_b) / sd ^ 2) +
-    (n / sd ^ 2) * (alpha_a - alpha_b + alpha_b * z_b ^ 2 - alpha_a * z_a ^ 2 +
-                      (alpha_a - alpha_b) * (alpha_a * z_a - alpha_b * z_b))
+  k12 <- -(2 * n * (alp_a - alp_b) / sd ^ 2) +
+    (n / sd ^ 2) * (alp_a - alp_b + alp_b * z_b ^ 2 - alp_a * z_a ^ 2 +
+                      (alp_a - alp_b) * (alp_a * z_a - alp_b * z_b))
 
-  k22 <- (n / sd ^ 2) - (3 * n * (1 + alpha_a * z_a - alpha_b * z_b) / sd ^ 2) +
-    (n / sd ^ 2) * (z_b * alpha_b * (z_b ^ 2 - 2) - z_a * alpha_a *
-                      (z_a ^ 2 - 2) +
-                      (alpha_b * z_b - alpha_a * z_a) ^ 2)
+  k22 <- (n / sd ^ 2) -
+    (3 * n * (1 + alp_a * z_a - alp_b * z_b) / sd ^ 2) +
+    (n / sd ^ 2) *
+    (z_b * alp_b * (z_b ^ 2 - 2) - z_a * alp_a * (z_a ^ 2 - 2) +
+       (alp_b * z_b - alp_a * z_a) ^ 2)
 
   return(matrix(c(-k11, -k12, -k12, -k22), nrow = 2, byrow = TRUE))
 }

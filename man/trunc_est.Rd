@@ -28,8 +28,8 @@ Estimates the posterior modes for the parameters of the underlying normal
 distribution, given truncated data
 }
 \examples{
-trunc_est(x = c(-1,-2,1,2), mean_start = 1, sd_start = 0.5, ci_level = 0.975,
-          a = 1, b = 5)
+x <- truncnorm::rtruncnorm(100, a = 0, b = 2, mean = 0.5, sd = 0.5)
+trunc_est(x, a = 0, b = 2)
 
 }
 \references{
