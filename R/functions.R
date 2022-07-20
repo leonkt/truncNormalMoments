@@ -13,10 +13,10 @@ alpha_a <- function(mean, sd, a, b) {
   stopifnot(a < b)
   stopifnot(sd > 0)
 
-  Z_score <- function(mean, sd, x){ (x-mean)/sd }
+  z_score <- function(mean, sd, x){ (x-mean)/sd }
 
-  Za = Z_score(mean, sd, a)
-  Zb = Z_score(mean, sd, b)
+  Za = z_score(mean, sd, a)
+  Zb = z_score(mean, sd, b)
 
   dnorm(Za) / (pnorm(Zb) - pnorm(Za))
 }
@@ -34,10 +34,10 @@ alpha_b <- function(mean, sd, a, b) {
   stopifnot(a < b)
   stopifnot(sd > 0)
 
-  Z_score <- function(mean, sd, x){ (x-mean)/sd }
+  z_score <- function(mean, sd, x){ (x-mean)/sd }
 
-  Za = Z_score(mean, sd, a)
-  Zb = Z_score(mean, sd, b)
+  Za = z_score(mean, sd, a)
+  Zb = z_score(mean, sd, b)
 
   dnorm(Za) / (pnorm(Zb) - pnorm(Za))
 }
@@ -76,7 +76,7 @@ nlpost_jeffreys <- function(mean, sd, x, a, b) {
                                              # remember sigma here is covariance matrix, not the SD
                                              sigma = sd^2 ) )
 
-  term3 <- log( sqrt( det( E_fisher(mean = mean, sd = sd, n = length(x), a = a, b = b) ) ) )
+  term3 <- log( sqrt( det( e_fisher(mean = mean, sd = sd, n = length(x), a = a, b = b) ) ) )
 
   nlp.value <- -( sum(term1) - term2 + term3 )
 
@@ -285,7 +285,7 @@ return( list( post = post,
 #'
 #' @importFrom stats dnorm pnorm
 #' @export
-E_fisher <- function(mean, sd, n, a, b) {
+e_fisher <- function(mean, sd, n, a, b) {
   stopifnot(sd > 0)
   stopifnot(a < b)
 
@@ -319,11 +319,11 @@ E_fisher <- function(mean, sd, n, a, b) {
 #' @param b Right truncation limit.
 #'
 #' @export
-prior <- function(mean, sd, x, a, b) {
+prior_jeffreys <- function(mean, sd, x, a, b) {
   stopifnot(a < b)
   stopifnot(sd > 0)
 
-  return (log( sqrt( det( E_fisher(mean = mean, sd = sd, n = length(x), a = a, b = b) ) ) ))
+  return (log( sqrt( det( e_fisher(mean = mean, sd = sd, n = length(x), a = a, b = b) ) ) ))
 }
 
 
