@@ -18,7 +18,13 @@ Authors@R:
            email = "b-mcshane@kellogg.northwestern.edu",
            comment = c())
 	)
-Imports: assert, stats, truncnorm, pracma, tmvtnorm, rstan, stats4, Deriv, mvtnorm
+Depends:
+    R (>= 3.4.0)
+Imports:
+    mvtnorm,
+    rstan,
+    stats,
+    stats4
 Description: This package finds the MAP parameter estimates for the mean and standard deviation for a Normal, given data from the truncated distribution.
 License: GPL (>=3)
 Encoding: UTF-8

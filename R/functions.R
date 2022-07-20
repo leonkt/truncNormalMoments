@@ -1,12 +1,3 @@
-
-library(testthat)
-library(rstan)
-library(Deriv)
-library(mvtnorm)
-library(truncnorm)
-library(testit)
-library(stats4)
-library(stats)
 ################################ INTERMEDIATE TERMS ################################
 
 #' Return the conditional density of a normal random variable, given that its value is between a and b, evaluated at Za.
@@ -62,8 +53,6 @@ alpha_b <- function(mean, sd, a, b) {
 #'
 #' @example
 #' nlpost_jeffreys(mean = 1, sd = 1, x = c(2), a = -5, b = 5)
-#'
-#' @importFrom mvtnorm dmvnorm pmvnorm
 
 nlpost_jeffreys <- function(mean, sd, x, a, b) {
   stopifnot(a < b)
@@ -71,18 +60,18 @@ nlpost_jeffreys <- function(mean, sd, x, a, b) {
   if ( sd < 0 ) return(.Machine$integer.max)
 
   # as in nll()
-  term1 <- dmvnorm(x = as.matrix(x, nrow = 1),
-                  mean = as.matrix(mean, nrow = 1),
-                  # sigma here is covariance matrix,
-                  sigma = as.matrix(sd^2, nrow=1),
-                  log = TRUE)
+  term1 <- mvtnorm::dmvnorm(x = as.matrix(x, nrow = 1),
+                            mean = as.matrix(mean, nrow = 1),
+                            # sigma here is covariance matrix,
+                            sigma = as.matrix(sd^2, nrow=1),
+                            log = TRUE)
 
 
-  term2 <- length(x) * log( pmvnorm(lower = a,
-                                   upper = b,
-                                   mean = mean,
-                                   # remember sigma here is covariance matrix, not the SD
-                                   sigma = sd^2 ) )
+  term2 <- length(x) * log( mvtnorm::pmvnorm(lower = a,
+                                             upper = b,
+                                             mean = mean,
+                                             # remember sigma here is covariance matrix, not the SD
+                                             sigma = sd^2 ) )
 
   term3 <- log( sqrt( det( E_fisher(mean = mean, sd = sd, n = length(x), a = a, b = b) ) ) )
 
@@ -108,9 +97,7 @@ nlpost_jeffreys <- function(mean, sd, x, a, b) {
 #' @example
 #' trunc_est(x=c(-1,-2,1,2), mean.start=1, sd.start=0.5, ci.level=0.975, a=1, b=5)
 #'
-#' @import rstan
 #' @importFrom stats median quantile coef
-#' @importFrom stats4 mle
 #'
 #' @references
 #' https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html
@@ -205,14 +192,14 @@ withCallingHandlers({
 
   # "isystem" arg is just a placeholder to avoid Stan's not understanding special characters
   #  in getwd(), even though we don't actually use the dir at all
-  stan.model <- stan_model(model_code = model.text,
-                           isystem = "~/Desktop")
+  stan.model <- rstan::stan_model(model_code = model.text,
+                                  isystem = "~/Desktop")
 
 
-  post <- sampling(stan.model,
-                  cores = 1,
-                  #refresh = 0,
-                  init = init.fcn, data=list(n=length(x), a=a, b=b, y=x), ...)
+  post <- rstan::sampling(stan.model,
+                          cores = 1,
+                          #refresh = 0,
+                          init = init.fcn, data=list(n=length(x), a=a, b=b, y=x), ...)
 
 
 }, warning = function(condition){
@@ -233,8 +220,8 @@ nlpost_simple = function(mean, sd) {
 }
 
 
-res <- mle( minuslogl = nlpost_simple,
-            start = list(mean=ext$mu[best.ind], sd= ext$sigma[best.ind]), method="Nelder-Mead" )
+res <- stats4::mle( minuslogl = nlpost_simple,
+                    start = list(mean=ext$mu[best.ind], sd= ext$sigma[best.ind]), method="Nelder-Mead" )
 
 
 maps <- as.numeric(stats4::coef(res))
@@ -292,7 +279,6 @@ return( list( post = post,
 #' @param n Number of observations.
 #' @param a Lower truncation limit.
 #' @param b Upper truncation limit.
-#' @importFrom assert assert
 #' @importFrom stats dnorm pnorm
 
 E_fisher <- function(mean, sd, n, a, b) {
