@@ -2,18 +2,20 @@
 % Please edit documentation in R/functions.R
 \name{trunc_est}
 \alias{trunc_est}
-\title{Estimates the posterior modes for the parameters of the underlying normal distribution, given truncated data}
+\title{Estimates the posterior modes for the parameters of the underlying normal
+distribution, given truncated data}
 \usage{
-trunc_est(x, mean.start = 0, sd.start = 1, ci.level = 0.95, a, b, ...)
+trunc_est(x, mean_start = 0, sd_start = 1, ci_level = 0.95, a, b, ...)
 }
 \arguments{
 \item{x}{Vector of observations from truncated normal}
 
-\item{mean.start}{Initial value for mu.}
+\item{mean_start}{Initial value for mu.}
 
-\item{sd.start}{Initial value for sigma.}
+\item{sd_start}{Initial value for sigma.}
 
-\item{ci.level}{Number between 0.5 and 1. Gives a 100(ci.level)\% confidence interval.}
+\item{ci_level}{Number between 0.5 and 1. Gives a 100(ci_level)\% confidence
+interval.}
 
 \item{a}{Left truncation limit.}
 
@@ -22,10 +24,12 @@ trunc_est(x, mean.start = 0, sd.start = 1, ci.level = 0.95, a, b, ...)
 \item{...}{Parameters to pass to sampling()}
 }
 \description{
-Estimates the posterior modes for the parameters of the underlying normal distribution, given truncated data
+Estimates the posterior modes for the parameters of the underlying normal
+distribution, given truncated data
 }
 \examples{
-trunc_est(x = c(-1,-2,1,2), mean.start = 1, sd.start = 0.5, ci.level = 0.975, a = 1, b = 5)
+trunc_est(x = c(-1,-2,1,2), mean_start = 1, sd_start = 0.5, ci_level = 0.975,
+          a = 1, b = 5)
 
 }
 \references{

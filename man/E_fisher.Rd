@@ -2,7 +2,8 @@
 % Please edit documentation in R/functions.R
 \name{e_fisher}
 \alias{e_fisher}
-\title{Finds the Fisher information matrix contained in n samples from a truncated normal distribution.}
+\title{Finds the Fisher information matrix contained in n samples from a truncated
+normal distribution.}
 \usage{
 e_fisher(mean, sd, n, a, b)
 }
@@ -18,7 +19,8 @@ e_fisher(mean, sd, n, a, b)
 \item{b}{Upper truncation limit.}
 }
 \description{
-Finds the Fisher information matrix contained in n samples from a truncated normal distribution.
+Finds the Fisher information matrix contained in n samples from a truncated
+normal distribution.
 }
 \examples{
 e_fisher(mean = 1, sd = 1, n = 10, a = -5, b = 5)

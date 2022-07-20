@@ -2,7 +2,8 @@
 % Please edit documentation in R/functions.R
 \name{alpha_b}
 \alias{alpha_b}
-\title{Return the conditional density of a normal random variable, given that its value is between a and b, evaluated at Zb.}
+\title{Return the conditional density of a normal random variable, given that its
+value is between a and b, evaluated at z_b.}
 \usage{
 alpha_b(mean, sd, a, b)
 }
@@ -16,7 +17,8 @@ alpha_b(mean, sd, a, b)
 \item{b}{Unstandardized upper truncation limit.}
 }
 \description{
-Return the conditional density of a normal random variable, given that its value is between a and b, evaluated at Zb.
+Return the conditional density of a normal random variable, given that its
+value is between a and b, evaluated at z_b.
 }
 \examples{
 alpha_b(mean = 1, sd = 1, a = -5, b = 5)
