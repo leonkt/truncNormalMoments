@@ -6,8 +6,9 @@
 #' @param sd Standard deviation of normal distribution.
 #' @param a Unstandardized lower truncation limit.
 #' @param b Unstandardized upper truncation limit.
+#'
 #' @importFrom stats dnorm pnorm
-
+#' @export
 alpha_a <- function(mean, sd, a, b) {
   stopifnot(a < b)
   stopifnot(sd > 0)
@@ -26,9 +27,9 @@ alpha_a <- function(mean, sd, a, b) {
 #' @param sd Standard deviation of normal distribution.
 #' @param a Unstandardized lower truncation limit.
 #' @param b Unstandardized upper truncation limit.
+#'
 #' @importFrom stats dnorm pnorm
-
-
+#' @export
 alpha_b <- function(mean, sd, a, b) {
   stopifnot(a < b)
   stopifnot(sd > 0)
@@ -50,6 +51,8 @@ alpha_b <- function(mean, sd, a, b) {
 #' @param x Data to use log likelihood calculation.
 #' @param a Left truncation limit.
 #' @param b Right truncation limit.
+#'
+#' @export
 #'
 #' @example
 #' nlpost_jeffreys(mean = 1, sd = 1, x = c(2), a = -5, b = 5)
@@ -94,15 +97,15 @@ nlpost_jeffreys <- function(mean, sd, x, a, b) {
 #' @param a Left truncation limit.
 #' @param b Right truncation limit.
 #' @param ... Parameters to pass to sampling()
+#'
+#' @importFrom stats median quantile coef
+#' @export
+#'
 #' @example
 #' trunc_est(x=c(-1,-2,1,2), mean.start=1, sd.start=0.5, ci.level=0.975, a=1, b=5)
 #'
-#' @importFrom stats median quantile coef
-#'
 #' @references
 #' https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html
-
-
 trunc_est <- function(x,
                       mean.start = 0,
                       sd.start = 1,
@@ -279,8 +282,9 @@ return( list( post = post,
 #' @param n Number of observations.
 #' @param a Lower truncation limit.
 #' @param b Upper truncation limit.
+#'
 #' @importFrom stats dnorm pnorm
-
+#' @export
 E_fisher <- function(mean, sd, n, a, b) {
   stopifnot(sd > 0)
   stopifnot(a < b)
@@ -313,7 +317,8 @@ E_fisher <- function(mean, sd, n, a, b) {
 #' @param x Data to use log likelihood calculation.
 #' @param a Left truncation limit.
 #' @param b Right truncation limit.
-
+#'
+#' @export
 prior <- function(mean, sd, x, a, b) {
   stopifnot(a < b)
   stopifnot(sd > 0)
