@@ -18,3 +18,6 @@ alpha_b(mean, sd, a, b)
 \description{
 Return the conditional density of a normal random variable, given that its value is between a and b, evaluated at Zb.
 }
+\examples{
+alpha_b(mean = 1, sd = 1, a = -5, b = 5)
+}

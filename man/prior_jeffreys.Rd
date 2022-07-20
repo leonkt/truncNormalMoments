@@ -20,3 +20,6 @@ prior_jeffreys(mean, sd, x, a, b)
 \description{
 Returns the value of the Jeffreys prior.
 }
+\examples{
+prior_jeffreys(mean = 1, sd = 1, x = 2, a = -5, b = 5)
+}

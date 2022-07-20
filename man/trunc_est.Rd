@@ -24,6 +24,10 @@ trunc_est(x, mean.start = 0, sd.start = 1, ci.level = 0.95, a, b, ...)
 \description{
 Estimates the posterior modes for the parameters of the underlying normal distribution, given truncated data
 }
+\examples{
+trunc_est(x = c(-1,-2,1,2), mean.start = 1, sd.start = 0.5, ci.level = 0.975, a = 1, b = 5)
+
+}
 \references{
 https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html
 }

@@ -9,6 +9,9 @@
 #'
 #' @importFrom stats dnorm pnorm
 #' @export
+#'
+#' @examples
+#' alpha_a(mean = 1, sd = 1, a = -5, b = 5)
 alpha_a <- function(mean, sd, a, b) {
   stopifnot(a < b)
   stopifnot(sd > 0)
@@ -30,6 +33,9 @@ alpha_a <- function(mean, sd, a, b) {
 #'
 #' @importFrom stats dnorm pnorm
 #' @export
+#'
+#' @examples
+#' alpha_b(mean = 1, sd = 1, a = -5, b = 5)
 alpha_b <- function(mean, sd, a, b) {
   stopifnot(a < b)
   stopifnot(sd > 0)
@@ -54,9 +60,8 @@ alpha_b <- function(mean, sd, a, b) {
 #'
 #' @export
 #'
-#' @example
-#' nlpost_jeffreys(mean = 1, sd = 1, x = c(2), a = -5, b = 5)
-
+#' @examples
+#' nlpost_jeffreys(mean = 1, sd = 1, x = 2, a = -5, b = 5)
 nlpost_jeffreys <- function(mean, sd, x, a, b) {
   stopifnot(a < b)
 
@@ -101,8 +106,8 @@ nlpost_jeffreys <- function(mean, sd, x, a, b) {
 #' @importFrom stats median quantile coef
 #' @export
 #'
-#' @example
-#' trunc_est(x=c(-1,-2,1,2), mean.start=1, sd.start=0.5, ci.level=0.975, a=1, b=5)
+#' @examples
+#' trunc_est(x = c(-1,-2,1,2), mean.start = 1, sd.start = 0.5, ci.level = 0.975, a = 1, b = 5)
 #'
 #' @references
 #' https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html
@@ -285,6 +290,9 @@ return( list( post = post,
 #'
 #' @importFrom stats dnorm pnorm
 #' @export
+#'
+#' @examples
+#' e_fisher(mean = 1, sd = 1, n = 10, a = -5, b = 5)
 e_fisher <- function(mean, sd, n, a, b) {
   stopifnot(sd > 0)
   stopifnot(a < b)
@@ -319,11 +327,11 @@ e_fisher <- function(mean, sd, n, a, b) {
 #' @param b Right truncation limit.
 #'
 #' @export
+#' @examples
+#' prior_jeffreys(mean = 1, sd = 1, x = 2, a = -5, b = 5)
 prior_jeffreys <- function(mean, sd, x, a, b) {
   stopifnot(a < b)
   stopifnot(sd > 0)
 
   return (log( sqrt( det( e_fisher(mean = mean, sd = sd, n = length(x), a = a, b = b) ) ) ))
 }
-
-

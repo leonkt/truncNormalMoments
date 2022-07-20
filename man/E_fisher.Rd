@@ -20,3 +20,6 @@ e_fisher(mean, sd, n, a, b)
 \description{
 Finds the Fisher information matrix contained in n samples from a truncated normal distribution.
 }
+\examples{
+e_fisher(mean = 1, sd = 1, n = 10, a = -5, b = 5)
+}

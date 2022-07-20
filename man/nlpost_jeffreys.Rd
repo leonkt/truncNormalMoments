@@ -20,3 +20,6 @@ nlpost_jeffreys(mean, sd, x, a, b)
 \description{
 Calculate the negative log posterior under the Jeffreys prior
 }
+\examples{
+nlpost_jeffreys(mean = 1, sd = 1, x = 2, a = -5, b = 5)
+}
