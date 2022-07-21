@@ -1,34 +1,24 @@
 Package: truncNormalMoments
-Title: Estimates mean and standard deviation for a Normal distribution, given data from a truncated Normal distribution
+Title: Estimates mean and standard deviation for a Normal distribution, given
+  data from a truncated Normal distribution
 Version: 0.0.0.9000
-Authors@R: 
-    c(person(given = "Leon",
-           family = "Tran",
-           role = c("aut", "cre"),
-           email = "leontk@stanford.edu",
-           comment = c()),
-	person(given = "Maya",
-           family = "Mathur",
-           role = c("ctb"),
-           email = "mmathur@stanford.edu",
-           comment = c()),
-	person(given = "Blakeley",
-           family = "McShane",
-           role = c("ctb"),
-           email = "b-mcshane@kellogg.northwestern.edu",
-           comment = c())
-	)
+Authors@R: c(
+  person("Leon", "Tran", role = c("aut", "cre"), email = "leontk@stanford.edu"),
+  person("Mika", "Braginsky", role = c("aut"), email = "mika.br@gmail.com"),
+	person("Maya", "Mathur", role = c("ctb"), email = "mmathur@stanford.edu"),
+	person("Blakeley", "McShane", role = c("ctb"), email = "b-mcshane@kellogg.northwestern.edu"))
+Description: This package finds the MAP parameter estimates for the mean and
+  standard deviation for a Normal, given data from the truncated distribution.
 Depends:
-    R (>= 3.4.0)
+    R (>= 3.5.0)
 Imports:
     methods,
-    mvtnorm,
+    mvtnorm (>= 1.1),
     Rcpp (>= 0.12.0),
     RcppParallel (>= 5.0.1),
     rstan (>= 2.18.1),
     rstantools (>= 2.2.0),
     stats
-Description: This package finds the MAP parameter estimates for the mean and standard deviation for a Normal, given data from the truncated distribution.
 License: GPL (>=3)
 Encoding: UTF-8
 LazyData: true
@@ -36,7 +26,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.0
 Suggests: 
     testthat (>= 3.0.0),
-    truncnorm
+    truncnorm (>= 1.0)
 Config/testthat/edition: 3
 Biarch: true
 LinkingTo: 
