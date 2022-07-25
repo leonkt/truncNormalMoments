@@ -2,13 +2,16 @@
 % Please edit documentation in R/models.R
 \name{trunc_est}
 \alias{trunc_est}
-\title{Estimates the posterior modes for the parameters of the underlying normal
-distribution, given truncated data}
+\title{Truncated normal estimation}
 \usage{
-trunc_est(x, mean_start = 0, sd_start = 1, ci_level = 0.95, a, b, ...)
+trunc_est(x, a, b, mean_start = 0, sd_start = 1, ci_level = 0.95, ...)
 }
 \arguments{
 \item{x}{Vector of observations from truncated normal}
+
+\item{a}{Left truncation limit.}
+
+\item{b}{Right truncation limit.}
 
 \item{mean_start}{Initial value for mu.}
 
@@ -17,21 +20,27 @@ trunc_est(x, mean_start = 0, sd_start = 1, ci_level = 0.95, a, b, ...)
 \item{ci_level}{Number between 0.5 and 1. Gives a 100(ci_level)\% confidence
 interval.}
 
-\item{a}{Left truncation limit.}
-
-\item{b}{Right truncation limit.}
-
 \item{...}{Parameters to pass to sampling()}
+}
+\value{
+A list with two elements:
+\describe{
+\item{stats}{A data frame with two rows and the columns \code{param}
+(\code{mean}, \code{sd}), \code{mean} (posterior mean),
+\code{median} (posterior median), \code{maxlp}, \code{se},
+\code{ci_lower}, \code{ci_upper}, \code{rhat}.}
+\item{fit}{A \code{stanfit} object (the result of fitting the model).}
+}
 }
 \description{
 Estimates the posterior modes for the parameters of the underlying normal
-distribution, given truncated data
+distribution, given truncated data.
 }
 \examples{
-x <- truncnorm::rtruncnorm(100, a = 0, b = 2, mean = 0.5, sd = 0.5)
-trunc_est(x, a = 0, b = 2)
-
+x <- truncnorm::rtruncnorm(100, a = -1, b = 2, mean = 0.5, sd = 0.5)
+trunc_est(x, a = -1, b = 2)
 }
 \references{
-https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html
+\insertRef{zhou2014}{truncNormalMoments}
+\insertRef{stan2022}{truncNormalMoments}
 }
