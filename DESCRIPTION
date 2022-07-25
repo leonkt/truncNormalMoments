@@ -1,9 +1,9 @@
-Package: truncNormalMoments
+Package: truncnormbayes
 Title: Estimates mean and standard deviation for a truncated normal distribution
   using Stan
 Version: 0.0.1
 Authors@R: c(
-  person("Mika", "Braginsky", role = c("aut", "cre")", email = "mika.br@gmail.com"),
+  person("Mika", "Braginsky", role = c("aut", "cre"), email = "mika.br@gmail.com"),
   person("Leon", "Tran", role = "aut", email = "leontk@stanford.edu"),
 	person("Maya", "Mathur", role = "ctb", email = "mmathur@stanford.edu"),
 	person("Blakeley", "McShane", role = "ctb", email = "b-mcshane@kellogg.northwestern.edu"))
@@ -41,8 +41,8 @@ LinkingTo:
     rstan (>= 2.18.1),
     StanHeaders (>= 2.18.0)
 License: GPL (>=3)
-URL: https://github.com/leonkt/truncNormalMoments
-BugReports: https://github.com/leonkt/truncNormalMoments/issues
+URL: https://github.com/leonkt/truncnormbayes
+BugReports: https://github.com/leonkt/truncnormbayes/issues
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

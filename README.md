@@ -1,9 +1,9 @@
-# truncNormalMoments
+# truncnormbayes
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-`truncNormalMoments` provides functionality to estimates mean and standard
+`truncnormbayes` provides functionality to estimates mean and standard
 deviation for a truncated normal distribution.
 
 Specifically, this package finds the MAP parameter estimates for the mean and
@@ -19,11 +19,11 @@ normal, with left and right truncations specified beforehand.
 
 ## Installation
 
-You can install the development version of truncNormalMoments from [GitHub](https://github.com/) with:
+You can install the development version of truncnormbayes from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("leonkt/truncNormalMoments")
+devtools::install_github("leonkt/truncnormbayes")
 ```
 
 ## Example
@@ -31,7 +31,7 @@ devtools::install_github("leonkt/truncNormalMoments")
 This is a basic example which shows you how to solve a common problem:
 
 ``` r
-library(truncNormalMoments)
+library(truncnormbayes)
 
 # generate data from a truncated normal
 x <- truncnorm::rtruncnorm(100, a = -1, b = 2, mean = 0.5, sd = 0.5)

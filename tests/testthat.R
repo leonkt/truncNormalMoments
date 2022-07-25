@@ -1,4 +1,4 @@
 library(testthat)
-library(truncNormalMoments)
+library(truncnormbayes)
 
-test_check("truncNormalMoments")
+test_check("truncnormbayes")

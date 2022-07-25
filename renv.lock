@@ -78,6 +78,16 @@
       "Hash": "f3e94e34ff656a7c8336ce01207bc2b8",
       "Requirements": []
     },
+    "Rdpack": {
+      "Package": "Rdpack",
+      "Version": "2.4",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "0ddbe51591ab1d3e7362e0da3727c837",
+      "Requirements": [
+        "rbibutils"
+      ]
+    },
     "StanHeaders": {
       "Package": "StanHeaders",
       "Version": "2.21.0-7",
@@ -477,6 +487,14 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "8b93531308c01ad0e56d9eadcc0c4fcd",
+      "Requirements": []
+    },
+    "rbibutils": {
+      "Package": "rbibutils",
+      "Version": "2.2.8",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "60eae09898124cffcab51e5ee082a89f",
       "Requirements": []
     },
     "rematch2": {

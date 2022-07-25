@@ -41,6 +41,6 @@ x <- truncnorm::rtruncnorm(100, a = -1, b = 2, mean = 0.5, sd = 0.5)
 trunc_est(x, a = -1, b = 2)
 }
 \references{
-\insertRef{zhou2014}{truncNormalMoments}
-\insertRef{stan2022}{truncNormalMoments}
+\insertRef{zhou2014}{truncnormbayes}
+\insertRef{stan2022}{truncnormbayes}
 }
