@@ -6,8 +6,7 @@
 #' @param x Vector of observations from truncated normal
 #' @param mu_start Initial value for mu.
 #' @param sigma_start Initial value for sigma.
-#' @param ci_level Number between 0.5 and 1. Gives a 100(ci_level)% confidence
-#'   interval.
+#' @param ci_level Number between 0.5 and 1. Gives a 100*2*(ci_level - 0.5)% symmetric HPD interval.
 #' @param a Left truncation limit.
 #' @param b Right truncation limit.
 #' @param ... Parameters to pass to sampling()
