@@ -1,13 +1,12 @@
 Package: truncnormbayes
-Title: Estimates mean and standard deviation for a truncated normal distribution
-  using Stan
+Title: Estimates Moments for a Truncated Normal Distribution using Stan
 Version: 0.0.1
 Authors@R: c(
   person("Mika", "Braginsky", role = c("aut", "cre"), email = "mika.br@gmail.com"),
   person("Leon", "Tran", role = "aut", email = "leontk@stanford.edu"),
 	person("Maya", "Mathur", role = "ctb", email = "mmathur@stanford.edu"),
 	person("Blakeley", "McShane", role = "ctb", email = "b-mcshane@kellogg.northwestern.edu"))
-Description: This package finds the MAP parameter estimates for the mean and
+Description: Finds the MAP parameter estimates for the mean and
   standard deviation for a normal distribution, given data from the truncated
   distribution. The method used extends Bayesian methods for parameter
   estimation for a singly truncated normal distribution [see Zhou, X.,
