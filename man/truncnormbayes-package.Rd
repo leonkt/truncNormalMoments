@@ -4,9 +4,9 @@
 \name{truncnormbayes-package}
 \alias{truncnormbayes}
 \alias{truncnormbayes-package}
-\title{truncnormbayes: Estimates mean and standard deviation for a truncated normal distribution using Stan}
+\title{truncnormbayes: Estimates Moments for a Truncated Normal Distribution using Stan}
 \description{
-This package finds the MAP parameter estimates for the mean and standard deviation for a normal distribution, given data from the truncated distribution. The method used extends Bayesian methods for parameter estimation for a singly truncated normal distribution [see Zhou, X., Giacometti, R., Fabozzi, F. J., & Tucker, A. H. (2014). Bayesian estimation of truncated data with applications to operational risk measurement. Quantitative Finance, 14(5), 863-888. \doi{10.1080/14697688.2012.752103}]. We extend it by considering the doubly truncated normal distribution. We use the Jeffreys prior and find MAP estimates of the mean and standard deviation of a doubly truncated normal, with left and right truncations specified beforehand.
+Finds the posterior modes for the mean and standard deviation for a truncated normal distribution with one or two known truncation points. The method used extends Bayesian methods for parameter estimation for a singly truncated normal distribution under the Jeffreys prior [see Zhou, X., Giacometti, R., Fabozzi, F. J., & Tucker, A. H. (2014). Bayesian estimation of truncated data with applications to operational risk measurement. Quantitative Finance, 14(5), 863-888. \doi{10.1080/14697688.2012.752103}]. This package additionally allows for a doubly truncated normal distribution.
 }
 \references{
 \insertRef{zhou2014}{truncnormbayes}
@@ -32,7 +32,6 @@ Authors:
 Other contributors:
 \itemize{
   \item Maya Mathur \email{mmathur@stanford.edu} [contributor]
-  \item Blakeley McShane \email{b-mcshane@kellogg.northwestern.edu} [contributor]
 }
 
 }

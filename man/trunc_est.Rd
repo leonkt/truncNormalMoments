@@ -2,45 +2,50 @@
 % Please edit documentation in R/models.R
 \name{trunc_est}
 \alias{trunc_est}
-\title{Truncated normal estimation}
+\title{Estimate truncated normal distribution}
 \usage{
-trunc_est(x, a, b, mean_start = 0, sd_start = 1, ci_level = 0.95, ...)
+trunc_est(x, a, b, mu_start = 0, sigma_start = 1, ci_level = 0.95, ...)
 }
 \arguments{
-\item{x}{Vector of observations from truncated normal}
+\item{x}{Vector of observations from truncated normal.}
 
 \item{a}{Left truncation limit.}
 
 \item{b}{Right truncation limit.}
 
-\item{mean_start}{Initial value for mu.}
+\item{mu_start}{Initial value for mu.}
 
-\item{sd_start}{Initial value for sigma.}
+\item{sigma_start}{Initial value for sigma.}
 
-\item{ci_level}{Number between 0.5 and 1. Gives a 100(ci_level)\% confidence
-interval.}
+\item{ci_level}{Number between 0.5 and 1. Gives a 100 * 2 * (ci_level - 0.5)\%
+symmetric HPD interval.}
 
-\item{...}{Parameters to pass to sampling()}
+\item{...}{Parameters to pass to \code{rstan::sampling()}.}
 }
 \value{
 A list with two elements:
 \describe{
 \item{stats}{A data frame with two rows and the columns \code{param}
-(\code{mean}, \code{sd}), \code{mean} (posterior mean),
-\code{median} (posterior median), \code{maxlp}, \code{se},
-\code{ci_lower}, \code{ci_upper}, \code{rhat}.}
+(\code{mu}, \code{sd}), \code{mode} (posterior mode),
+\code{mean} (posterior mean), \code{median}
+(posterior median), \code{se} (standard error),
+\code{ci_lower} (lower CI bound), \code{ci_upper}
+(upper CI bound), \code{rhat}.}
 \item{fit}{A \code{stanfit} object (the result of fitting the model).}
 }
 }
 \description{
-Estimates the posterior modes for the parameters of the underlying normal
-distribution, given truncated data.
+Estimates the posterior modes for the mean (mu) and standard deviation
+(sigma) of the underlying normal distribution, given truncated data with
+known truncation point(s).
 }
 \examples{
+set.seed(22)
 x <- truncnorm::rtruncnorm(100, a = -1, b = 2, mean = 0.5, sd = 0.5)
 trunc_est(x, a = -1, b = 2)
 }
 \references{
 \insertRef{zhou2014}{truncnormbayes}
+
 \insertRef{stan2022}{truncnormbayes}
 }

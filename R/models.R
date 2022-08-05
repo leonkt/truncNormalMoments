@@ -1,22 +1,26 @@
 #' Estimate truncated normal distribution
 #'
-#' Estimates the posterior modes for the mean (\code{mu}) and standard deviation (\code{sigma}) of the underlying normal
-#' distribution, given truncated data with known truncation point(s).
+#' Estimates the posterior modes for the mean (mu) and standard deviation
+#' (sigma) of the underlying normal distribution, given truncated data with
+#' known truncation point(s).
 #'
-#' @param x Vector of observations from truncated normal
+#' @param x Vector of observations from truncated normal.
 #' @param mu_start Initial value for mu.
 #' @param sigma_start Initial value for sigma.
-#' @param ci_level Number between 0.5 and 1. Gives a 100*2*(ci_level - 0.5)% symmetric HPD interval.
+#' @param ci_level Number between 0.5 and 1. Gives a 100 * 2 * (ci_level - 0.5)%
+#'   symmetric HPD interval.
 #' @param a Left truncation limit.
 #' @param b Right truncation limit.
-#' @param ... Parameters to pass to sampling()
+#' @param ... Parameters to pass to \code{rstan::sampling()}.
 #'
 #' @return A list with two elements:
 #'  \describe{
 #'    \item{stats}{A data frame with two rows and the columns \code{param}
-#'                 (\code{mu}, \code{sd}), \code{mu} (posterior mean),
-#'                 \code{median} (posterior median), \code{maxlp}, \code{se},
-#'                 \code{ci_lower}, \code{ci_upper}, \code{rhat}.}
+#'                 (\code{mu}, \code{sd}), \code{mode} (posterior mode),
+#'                 \code{mean} (posterior mean), \code{median}
+#'                 (posterior median), \code{se} (standard error),
+#'                 \code{ci_lower} (lower CI bound), \code{ci_upper}
+#'                 (upper CI bound), \code{rhat}.}
 #'    \item{fit}{A \code{stanfit} object (the result of fitting the model).}
 #'  }
 #'
@@ -24,9 +28,11 @@
 #'
 #' @references
 #' \insertRef{zhou2014}{truncnormbayes}
+#'
 #' \insertRef{stan2022}{truncnormbayes}
 #'
 #' @examples
+#' set.seed(22)
 #' x <- truncnorm::rtruncnorm(100, a = -1, b = 2, mean = 0.5, sd = 0.5)
 #' trunc_est(x, a = -1, b = 2)
 trunc_est <- function(x,
