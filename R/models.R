@@ -7,8 +7,8 @@
 #' @param x Vector of observations from truncated normal.
 #' @param mu_start Initial value for mu.
 #' @param sigma_start Initial value for sigma.
-#' @param ci_level Number between 0.5 and 1. Gives a 100 * 2 * (ci_level - 0.5)%
-#'   symmetric HPD interval.
+#' @param ci_level Confidence level of the interval – gives a 100*ci_level%
+#'   symmetric HPD interval (defaults to 95%).
 #' @param a Left truncation limit.
 #' @param b Right truncation limit.
 #' @param ... Parameters to pass to \code{rstan::sampling()}.
@@ -70,8 +70,9 @@ trunc_est <- function(x,
   modes <- c(stan_extract$mu[index_maxlp], stan_extract$sigma[index_maxlp])
 
   stan_ci <- function(param, q) as.numeric(quantile(stan_extract[[param]], q))
-  cil <- c(stan_ci("mu", 1 - ci_level), stan_ci("sigma", 1 - ci_level))
-  ciu <- c(stan_ci("mu", ci_level), stan_ci("sigma", ci_level))
+  alpha <- 1 - ci_level
+  cil <- c(stan_ci("mu", alpha / 2), stan_ci("sigma", alpha / 2))
+  ciu <- c(stan_ci("mu", 1 - alpha / 2), stan_ci("sigma", 1 - alpha / 2))
 
   stan_stats <- data.frame(param = c("mu", "sigma"), mode = modes, mean = means,
                            median = medians, se = ses, ci_lower = cil,
