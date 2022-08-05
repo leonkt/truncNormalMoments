@@ -5,9 +5,9 @@ test_that("trunc_est inputs", {
   # a must be less than b
   expect_error(trunc_est(x, a = 4, b = 2))
 
-  # sd_start must be greater than 0
-  expect_error(trunc_est(x, a = 4, b = 2, sd_start = 0))
-  expect_error(trunc_est(x, a = 4, b = 2, sd_start = -1))
+  # sigma_start must be greater than 0
+  expect_error(trunc_est(x, a = 4, b = 2, sigma_start = 0))
+  expect_error(trunc_est(x, a = 4, b = 2, sigma_start = -1))
 
   # x values must be between a and b
   expect_error(trunc_est(x, a = 1, b = 2))
@@ -17,7 +17,7 @@ test_that("trunc_est inputs", {
 
 check_estimates <- function(mu, sigma, a, b, tolerance = 0.1) {
   x <- truncnorm::rtruncnorm(1000, a = a, b = b, mean = mu, sd = sigma)
-  est <- trunc_est(x, a = a, b = b, mean_start = mu, sd_start = sigma)
+  est <- trunc_est(x, a = a, b = b, mu_start = mu, sigma_start = sigma)
   modes <- est$stats$mode
   message(sprintf("estimated: mu = %.2f, sigma = %.2f", modes[1], modes[2]))
   message(sprintf("actual: mu = %.2f, sigma = %.2f", mu, sigma))
