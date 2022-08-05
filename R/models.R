@@ -1,13 +1,12 @@
-#' Truncated normal estimation
+#' Estimate truncated normal distribution
 #'
-#' Estimates the posterior modes for the parameters of the underlying normal
-#' distribution, given truncated data.
+#' Estimates the posterior modes for the mean (\code{mu}) and standard deviation (\code{sigma}) of the underlying normal
+#' distribution, given truncated data with known truncation point(s).
 #'
 #' @param x Vector of observations from truncated normal
-#' @param mean_start Initial value for mu.
-#' @param sd_start Initial value for sigma.
-#' @param ci_level Number between 0.5 and 1. Gives a 100(ci_level)% confidence
-#'   interval.
+#' @param mu_start Initial value for mu.
+#' @param sigma_start Initial value for sigma.
+#' @param ci_level Number between 0.5 and 1. Gives a 100*2*(ci_level - 0.5)% symmetric HPD interval.
 #' @param a Left truncation limit.
 #' @param b Right truncation limit.
 #' @param ... Parameters to pass to sampling()
@@ -15,7 +14,7 @@
 #' @return A list with two elements:
 #'  \describe{
 #'    \item{stats}{A data frame with two rows and the columns \code{param}
-#'                 (\code{mean}, \code{sd}), \code{mean} (posterior mean),
+#'                 (\code{mu}, \code{sd}), \code{mu} (posterior mean),
 #'                 \code{median} (posterior median), \code{maxlp}, \code{se},
 #'                 \code{ci_lower}, \code{ci_upper}, \code{rhat}.}
 #'    \item{fit}{A \code{stanfit} object (the result of fitting the model).}
@@ -33,17 +32,17 @@
 trunc_est <- function(x,
                       a,
                       b,
-                      mean_start = 0,
-                      sd_start = 1,
+                      mu_start = 0,
+                      sigma_start = 1,
                       ci_level = 0.95,
                       ...) {
   stopifnot(a < b)
-  stopifnot(sd_start > 0)
+  stopifnot(sigma_start > 0)
   stopifnot(all(x >= a))
   stopifnot(all(x <= b))
 
   # set start values for sampler
-  init_fcn <- function() list(mean = mean_start, sd = sd_start)
+  init_fcn <- function() list(mean = mu_start, sd = sigma_start)
 
   stan_fit <- rstan::sampling(stanmodels$trunc_est,
                               cores = 1,

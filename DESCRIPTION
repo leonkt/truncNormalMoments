@@ -2,20 +2,17 @@ Package: truncnormbayes
 Title: Estimates Moments for a Truncated Normal Distribution using Stan
 Version: 0.0.1
 Authors@R: c(
-  person("Mika", "Braginsky", role = c("aut", "cre"), email = "mika.br@gmail.com"),
   person("Leon", "Tran", role = "aut", email = "leontk@stanford.edu"),
-	person("Maya", "Mathur", role = "ctb", email = "mmathur@stanford.edu"),
-	person("Blakeley", "McShane", role = "ctb", email = "b-mcshane@kellogg.northwestern.edu"))
-Description: Finds the MAP parameter estimates for the mean and
-  standard deviation for a normal distribution, given data from the truncated
-  distribution. The method used extends Bayesian methods for parameter
-  estimation for a singly truncated normal distribution [see Zhou, X.,
+  person("Mika", "Braginsky", role = c("aut", "cre"), email = "mika.br@gmail.com"),
+	person("Maya", "Mathur", role = "ctb", email = "mmathur@stanford.edu"))
+Description: Finds the posterior modes for the mean and standard deviation for a
+  truncated normal distribution with one or two known truncation points.
+  The method used extends Bayesian methods for parameter estimation for a singly
+  truncated normal distribution under the Jeffreys prior [see Zhou, X.,
   Giacometti, R., Fabozzi, F. J., & Tucker, A. H. (2014). Bayesian estimation of
   truncated data with applications to operational risk measurement.
-  Quantitative Finance, 14(5), 863-888. <doi:10.1080/14697688.2012.752103>]. We
-  extend it by considering the doubly truncated normal distribution. We use the
-  Jeffreys prior and find MAP estimates of the mean and standard deviation of a
-  doubly truncated normal, with left and right truncations specified beforehand.
+  Quantitative Finance, 14(5), 863-888. <doi:10.1080/14697688.2012.752103>].
+  This package additionally allows for a doubly truncated normal distribution. 
 Depends:
     R (>= 3.5.0)
 Imports:
