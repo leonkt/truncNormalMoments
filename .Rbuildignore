@@ -2,7 +2,6 @@
 ^renv\.lock$
 ^truncnormbayes\.Rproj$
 ^\.Rproj\.user$
-^LICENSE\.md$
-^\.github$
 cran-comments.md
-^CRAN-SUBMISSION$
+^LICENSE\.md$
+^README\.md$

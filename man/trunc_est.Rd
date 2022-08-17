@@ -17,8 +17,8 @@ trunc_est(x, a, b, mu_start = 0, sigma_start = 1, ci_level = 0.95, ...)
 
 \item{sigma_start}{Initial value for sigma.}
 
-\item{ci_level}{Number between 0.5 and 1. Gives a 100 * 2 * (ci_level - 0.5)\%
-symmetric HPD interval.}
+\item{ci_level}{Confidence level of the interval – gives a 100*ci_level\%
+symmetric HPD interval (defaults to 95\%).}
 
 \item{...}{Parameters to pass to \code{rstan::sampling()}.}
 }

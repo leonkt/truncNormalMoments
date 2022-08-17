@@ -1,7 +1,8 @@
 ## Test environments
-- local OSX install (R 4.2.1)
-- Windows Server 2022, R-devel, 64 bit (on R-hub)
+- local OSX install, R 4.2.1
 - Fedora Linux, R-devel, clang, gfortran (on R-hub)
+- (on R-hub)
+- win-builder (devel and release)
 
 
 ## R CMD check results

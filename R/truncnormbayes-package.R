@@ -5,11 +5,10 @@
 #' \insertRef{stan2022}{truncnormbayes}
 "_PACKAGE"
 
-## usethis namespace: start
 #' @useDynLib truncnormbayes, .registration = TRUE
 #' @import methods
 #' @import Rcpp
+#' @importFrom rstan sampling
 #' @importFrom Rdpack reprompt
 #' @importFrom stats dnorm pnorm median quantile
-## usethis namespace: end
 NULL
