@@ -1,7 +1,6 @@
 ## Test environments
-- local OSX install, R 4.2.1
-- Fedora Linux, R-devel, clang, gfortran (on R-hub)
-- (on R-hub)
+- macOS 12.2, R 4.2.1 (local install)
+- Ubuntu 20.04, R 4.2.1 (on R-hub)
 - win-builder (devel and release)
 
 
