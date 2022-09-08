@@ -1,6 +1,6 @@
 Package: truncnormbayes
 Title: Estimates Moments for a Truncated Normal Distribution using 'Stan'
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: c(
   person("Mika", "Braginsky", role = c("aut", "cre"), email = "mika.br@gmail.com"),
   person("Leon", "Tran", role = "aut", email = "leontk@stanford.edu"),
@@ -40,6 +40,7 @@ LinkingTo:
   StanHeaders (>= 2.18.0)
 Suggests:
     testthat (>= 3.0.0),
-    truncnorm (>= 1.0)
+    truncnorm (>= 1.0),
+    withr (>= 2.5.0)
 Config/testthat/edition: 3
 SystemRequirements: GNU make

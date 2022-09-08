@@ -8,21 +8,7 @@
 
 There were no ERRORs or WARNINGs.
 
-There were 3 NOTEs:
-
-```
-* checking CRAN incoming feasibility ... NOTE
-Maintainer: 'Mika Braginsky <mika.br@gmail.com>'
-
-New submission
-
-Possibly misspelled words in DESCRIPTION:
-  Fabozzi (12:19)
-  Jeffreys (11:43)
-  Zhou (11:63)
-```
-
-This is a new package. None of these are actually misspellings.
+There were 2 NOTEs:
 
 
 ```
