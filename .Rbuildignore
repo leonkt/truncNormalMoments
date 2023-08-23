@@ -1,8 +1,12 @@
 ^renv$
 ^renv\.lock$
-^truncnormbayes\.Rproj$
+^.*\.Rproj$
 ^\.Rproj\.user$
-cran-comments.md
 ^LICENSE\.md$
-^README\.md$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.github$
+^cran-comments\.md$
 ^CRAN-SUBMISSION$
+^RELEASE\.R$
