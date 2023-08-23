@@ -12,7 +12,7 @@ points. The method used extends Bayesian methods for parameter estimation for a
 singly truncated normal distribution under the Jeffreys prior [see Zhou, X.,
 Giacometti, R., Fabozzi, F. J., & Tucker, A. H. (2014). Bayesian estimation of
 truncated data with applications to operational risk measurement. Quantitative
-Finance, 14(5), 863-888. <doi:10.1080/14697688.2012.752103>]. This package
+Finance, 14(5), 863-888. [DOI 10.1080/14697688.2012.752103](https://doi.org/10.1080/14697688.2012.752103)]. This package
 additionally allows for a doubly truncated normal distribution.
 
 ## Installation
