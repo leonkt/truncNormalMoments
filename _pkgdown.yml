@@ -1,0 +1,4 @@
+url: http://mathurlabstanford.github.io/truncnormbayes/
+template:
+  bootstrap: 5
+  bootswatch: flatly
