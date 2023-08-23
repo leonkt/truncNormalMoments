@@ -8,18 +8,7 @@
 
 There were no ERRORs or WARNINGs.
 
-There were 2 NOTEs:
-
-
-```
-* checking dependencies in R code ... NOTE
-Namespaces in Imports field not imported from:
-  'RcppParallel' 'rstantools'
-  All declared Imports should be used.
-```
-
-These packages are all used.
-
+There was 1 NOTE:
 
 ```
 * checking for GNU extensions in Makefiles ... NOTE
