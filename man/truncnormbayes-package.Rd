@@ -16,16 +16,18 @@ Finds the posterior modes for the mean and standard deviation for a truncated no
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/leonkt/truncnormbayes}
-  \item Report bugs at \url{https://github.com/leonkt/truncnormbayes/issues}
+  \item \url{https://github.com/mathurlabstanford/truncnormbayes}
+  \item \url{https://mathurlabstanford.github.io/truncnormbayes/}
+  \item Report bugs at \url{https://github.com/mathurlabstanford/truncnormbayes/issues}
 }
 
 }
 \author{
-\strong{Maintainer}: Mika Braginsky \email{mika.br@gmail.com}
+\strong{Maintainer}: Peter Solymos \email{peter@analythium.io} (\href{https://orcid.org/0000-0001-7337-1740}{ORCID}) [contributor]
 
 Authors:
 \itemize{
+  \item Mika Braginsky \email{mika.br@gmail.com}
   \item Leon Tran \email{leontk@stanford.edu}
 }
 
