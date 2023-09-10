@@ -42,7 +42,7 @@ data{
 	int<lower=0> n;
     real a;
 	real b;
-	real<lower=a,upper=b> y[n];
+	array[n] real<lower=a,upper=b> y;
 }
 parameters{
     real mu;
